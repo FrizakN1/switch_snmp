@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	g "github.com/gosnmp/gosnmp"
-	"log"
 	"snmp/settings"
 	"strconv"
 	"strings"
@@ -37,9 +36,11 @@ func handlerGetEltex(c *gin.Context) {
 	g.Default.Target = ip
 	g.Default.Community = "eltexstat"
 
+	fmt.Printf("start snmp %s \n", ip)
+
 	err := g.Default.Connect()
 	if err != nil {
-		log.Fatalf("38: Connect() err: %v", err)
+		fmt.Println("44: ", err)
 	}
 	defer g.Default.Conn.Close()
 
@@ -75,7 +76,7 @@ func handlerGetEltex(c *gin.Context) {
 func getBatteryStatus() (string, string) {
 	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
 	if err != nil {
-		log.Fatalf("83: Get() err: %v", err)
+		fmt.Println("80: ", err)
 	}
 
 	status := result[0].Value.(int)
@@ -117,7 +118,7 @@ func getBatteryStatus() (string, string) {
 func getSN() string {
 	result, err := g.Default.Get([]string{"1.3.6.1.4.1.89.53.14.1.5.1"})
 	if err != nil {
-		log.Fatalf("83: Get() err: %v", err)
+		fmt.Println("122: ", err)
 	}
 
 	bytes := result.Variables[0].Value.([]byte)
@@ -127,7 +128,7 @@ func getSN() string {
 func getSystemName() string {
 	result, err := g.Default.Get([]string{"1.3.6.1.2.1.1.5.0"})
 	if err != nil {
-		log.Fatalf("93: Get() err: %v", err)
+		fmt.Println("132: ", err)
 	}
 
 	bytes := result.Variables[0].Value.([]byte)
@@ -144,7 +145,7 @@ func getPortsMode(portMap map[int]Port) {
 
 	result, err := g.Default.Get(portModeOids)
 	if err != nil {
-		log.Fatalf("110: Get() err: %v", err)
+		fmt.Println("149: ", err)
 	}
 
 	for _, variable := range result.Variables {
@@ -152,7 +153,7 @@ func getPortsMode(portMap map[int]Port) {
 
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("157: ", err)
 			return
 		}
 
@@ -192,7 +193,7 @@ func getPortsSpeed(portMap map[int]Port) {
 
 	result, err := g.Default.Get(portSpeedOids)
 	if err != nil {
-		log.Fatalf("158: Get() err: %v", err)
+		fmt.Println("197: ", err)
 	}
 
 	for _, variable := range result.Variables {
@@ -200,7 +201,7 @@ func getPortsSpeed(portMap map[int]Port) {
 
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("205: ", err)
 			return
 		}
 
@@ -225,7 +226,7 @@ func getPortsDescription(portMap map[int]Port) {
 
 	result, err := g.Default.Get(portDescOids)
 	if err != nil {
-		log.Fatalf("191: Get() err: %v", err)
+		fmt.Println("230: ", err)
 	}
 
 	for _, variable := range result.Variables {
@@ -233,7 +234,7 @@ func getPortsDescription(portMap map[int]Port) {
 
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("238: ", err)
 			return
 		}
 
@@ -249,14 +250,14 @@ func getPortsDescription(portMap map[int]Port) {
 func getPortsVlan(portMap map[int]Port, oid string, step int) {
 	result, err := g.Default.BulkWalkAll(oid) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
-		log.Fatalf("215: Get() err: %v", err)
+		fmt.Println("254: ", err)
 	}
 
 	for i, variable := range result {
 		oidParts := strings.Split(variable.Name, ".")
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("260: ", err)
 			return
 		}
 
@@ -295,7 +296,7 @@ func getPortsVlan(portMap map[int]Port, oid string, step int) {
 							if el != "0" {
 								field, err := hexToBinary(el)
 								if err != nil {
-									fmt.Println(err)
+									fmt.Println("299: ", err)
 								}
 
 								vlan += 4 - len(field)
