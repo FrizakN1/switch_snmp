@@ -152,22 +152,26 @@ func getUptime() string {
 		fmt.Println("133: ", err)
 	}
 
-	timeTicks := result[0].Value.(uint32)
+	if len(result) > 0 {
+		timeTicks := result[0].Value.(uint32)
 
-	duration := time.Duration(timeTicks) * time.Millisecond * 10
+		duration := time.Duration(timeTicks) * time.Millisecond * 10
 
-	days := duration / (24 * time.Hour)
-	duration -= days * (24 * time.Hour)
+		days := duration / (24 * time.Hour)
+		duration -= days * (24 * time.Hour)
 
-	hours := duration / time.Hour
-	duration -= hours * time.Hour
+		hours := duration / time.Hour
+		duration -= hours * time.Hour
 
-	minutes := duration / time.Minute
-	duration -= minutes * time.Minute
+		minutes := duration / time.Minute
+		duration -= minutes * time.Minute
 
-	seconds := duration / time.Second
+		seconds := duration / time.Second
 
-	return fmt.Sprintf("%d Дней %d:%d:%d\n", days, hours, minutes, seconds)
+		return fmt.Sprintf("%d Дней %d:%d:%d\n", days, hours, minutes, seconds)
+	}
+
+	return "Неизвестно"
 }
 
 func getBatteryCharge() int {
@@ -179,9 +183,9 @@ func getBatteryCharge() int {
 	if len(result) > 0 {
 		value := result[0].Value.(int)
 		return value
-	} else {
-		return -1
 	}
+
+	return -1
 }
 
 func getStringValue(oid string) string {
