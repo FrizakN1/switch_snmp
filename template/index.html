@@ -69,7 +69,8 @@
 </head>
 <body>
     <h1>{{.SystemName}}</h1>
-    <h3>IP: {{.IP}} | S/N {{.SN}} | Состояние АКБ: <span class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</span></h3>
+    <h3>IP: {{.IP}} | Версия ПО: {{.Firmware}} | S/N: {{.SN}} | Состояние АКБ: <span class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</span>
+        {{if gt .BatteryCharge -1}}| Заряд АКБ:  {{.BatteryCharge}} {{end}}| Время работы: {{.Uptime}}</h3>
     <table>
         <thead>
             <tr>

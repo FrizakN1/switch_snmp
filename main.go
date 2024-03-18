@@ -7,6 +7,8 @@ import (
 	"snmp/settings"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 type Port struct {
@@ -46,22 +48,90 @@ func handlerGetEltex(c *gin.Context) {
 
 	portMap := make(map[int]Port)
 
+	var wg sync.WaitGroup
+
 	for i := 1; i < 5; i++ {
 		oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-		getPortsVlan(portMap, oid, i)
+		wg.Add(1)
+		go func(step int, oid string) {
+			defer wg.Done()
+
+			getPortsVlan(portMap, oid, step)
+		}(i, oid)
 	}
 
-	getPortsDescription(portMap)
+	wg.Wait()
 
-	getPortsSpeed(portMap)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-	getPortsMode(portMap)
+		getPortsDescription(portMap)
+	}()
 
-	systemName := getSystemName()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-	batteryStatus, colorStatus := getBatteryStatus()
+		getPortsSpeed(portMap)
+	}()
 
-	SN := getSN()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		getPortsMode(portMap)
+	}()
+
+	var systemName string
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		systemName = getStringValue("1.3.6.1.2.1.1.5.0")
+	}()
+
+	var batteryStatus, colorStatus string
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		batteryStatus, colorStatus = getBatteryStatus()
+	}()
+
+	var firmware string
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		firmware = getStringValue("1.3.6.1.4.1.89.2.16.1.1.4.1")
+	}()
+
+	var SN string
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		SN = getStringValue("1.3.6.1.4.1.89.53.14.1.5.1")
+	}()
+
+	var batteryCharge int
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		batteryCharge = getBatteryCharge()
+	}()
+
+	var uptime string
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		uptime = getUptime()
+	}()
+
+	wg.Wait()
 
 	c.HTML(200, "index", gin.H{
 		"Ports":         portMap,
@@ -70,7 +140,62 @@ func handlerGetEltex(c *gin.Context) {
 		"IP":            ip,
 		"BatteryStatus": batteryStatus,
 		"ColorStatus":   colorStatus,
+		"Firmware":      firmware,
+		"BatteryCharge": batteryCharge,
+		"Uptime":        uptime,
 	})
+}
+
+func getUptime() string {
+	result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.1.3")
+	if err != nil {
+		fmt.Println("133: ", err)
+	}
+
+	timeTicks := result[0].Value.(uint32)
+
+	duration := time.Duration(timeTicks) * time.Millisecond * 10
+
+	days := duration / (24 * time.Hour)
+	duration -= days * (24 * time.Hour)
+
+	hours := duration / time.Hour
+	duration -= hours * time.Hour
+
+	minutes := duration / time.Minute
+	duration -= minutes * time.Minute
+
+	seconds := duration / time.Second
+
+	return fmt.Sprintf("%d Дней %d:%d:%d\n", days, hours, minutes, seconds)
+}
+
+func getBatteryCharge() int {
+	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
+	if err != nil {
+		fmt.Println("133: ", err)
+	}
+
+	if len(result) > 0 {
+		value := result[0].Value.(int)
+		return value
+	} else {
+		return -1
+	}
+}
+
+func getStringValue(oid string) string {
+	result, err := g.Default.Get([]string{oid})
+	if err != nil {
+		fmt.Println("133: ", err)
+	}
+
+	if len(result.Variables) > 0 {
+		bytes := result.Variables[0].Value.([]byte)
+		return string(bytes)
+	} else {
+		return "#Ошибка"
+	}
 }
 
 func getBatteryStatus() (string, string) {
@@ -118,26 +243,6 @@ func getBatteryStatus() (string, string) {
 	}
 
 	return batteryStatus, colorStatus
-}
-
-func getSN() string {
-	result, err := g.Default.Get([]string{"1.3.6.1.4.1.89.53.14.1.5.1"})
-	if err != nil {
-		fmt.Println("122: ", err)
-	}
-
-	bytes := result.Variables[0].Value.([]byte)
-	return string(bytes)
-}
-
-func getSystemName() string {
-	result, err := g.Default.Get([]string{"1.3.6.1.2.1.1.5.0"})
-	if err != nil {
-		fmt.Println("132: ", err)
-	}
-
-	bytes := result.Variables[0].Value.([]byte)
-	return string(bytes)
 }
 
 func getPortsMode(portMap map[int]Port) {
