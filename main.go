@@ -52,84 +52,28 @@ func handlerGetEltex(c *gin.Context) {
 
 	for i := 1; i < 5; i++ {
 		oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-		wg.Add(1)
-		go func(step int, oid string) {
-			defer wg.Done()
-
-			getPortsVlan(portMap, oid, step)
-		}(i, oid)
+		getPortsVlan(portMap, oid, i)
 	}
 
 	wg.Wait()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	getPortsDescription(portMap)
 
-		getPortsDescription(portMap)
-	}()
+	getPortsSpeed(portMap)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	getPortsMode(portMap)
 
-		getPortsSpeed(portMap)
-	}()
+	systemName := getStringValue("1.3.6.1.2.1.1.5.0")
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	batteryStatus, colorStatus := getBatteryStatus()
 
-		getPortsMode(portMap)
-	}()
+	firmware := getStringValue("1.3.6.1.4.1.89.2.16.1.1.4.1")
 
-	var systemName string
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	SN := getStringValue("1.3.6.1.4.1.89.53.14.1.5.1")
 
-		systemName = getStringValue("1.3.6.1.2.1.1.5.0")
-	}()
+	batteryCharge := getBatteryCharge()
 
-	var batteryStatus, colorStatus string
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		batteryStatus, colorStatus = getBatteryStatus()
-	}()
-
-	var firmware string
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		firmware = getStringValue("1.3.6.1.4.1.89.2.16.1.1.4.1")
-	}()
-
-	var SN string
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		SN = getStringValue("1.3.6.1.4.1.89.53.14.1.5.1")
-	}()
-
-	var batteryCharge int
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		batteryCharge = getBatteryCharge()
-	}()
-
-	var uptime string
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		uptime = getUptime()
-	}()
+	uptime := getUptime()
 
 	wg.Wait()
 
