@@ -79,37 +79,42 @@ func getBatteryStatus() (string, string) {
 		fmt.Println("80: ", err)
 	}
 
-	status := result[0].Value.(int)
 	var batteryStatus string
 	var colorStatus string
+	if len(result) > 0 {
+		status := result[0].Value.(int)
 
-	switch status {
-	case 1:
-		batteryStatus = "Батарея заряжена"
-		colorStatus = "green"
-		break
-	case 2:
-		batteryStatus = "Батарея разряжается"
-		colorStatus = "orange"
-		break
-	case 3:
-		batteryStatus = "Низкий уровень заряда батареи"
-		colorStatus = "red"
-		break
-	case 5:
-		batteryStatus = "Батарея отсутствует"
-		colorStatus = "black"
-		break
-	case 6:
-		batteryStatus = "Авария расцепителя тока питания батареи"
-		colorStatus = "red"
-		break
-	case 7:
-		batteryStatus = "Батарея заряжается"
-		colorStatus = "blue"
-		break
-	default:
+		switch status {
+		case 1:
+			batteryStatus = "Батарея заряжена"
+			colorStatus = "green"
+			break
+		case 2:
+			batteryStatus = "Батарея разряжается"
+			colorStatus = "orange"
+			break
+		case 3:
+			batteryStatus = "Низкий уровень заряда батареи"
+			colorStatus = "red"
+			break
+		case 5:
+			batteryStatus = "Батарея отсутствует"
+			colorStatus = "black"
+			break
+		case 6:
+			batteryStatus = "Авария расцепителя тока питания батареи"
+			colorStatus = "red"
+			break
+		case 7:
+			batteryStatus = "Батарея заряжается"
+			colorStatus = "blue"
+			break
+		default:
+			batteryStatus = "Неизвестно"
+		}
+	} else {
 		batteryStatus = "Неизвестно"
+		colorStatus = "black"
 	}
 
 	return batteryStatus, colorStatus
