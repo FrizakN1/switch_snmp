@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Eltex</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/snmp/assets/css/style.css">
 </head>
 <body>
     <h1>{{.SystemName}}</h1>
@@ -30,7 +30,7 @@
                 <td class="col4">{{$value.Vlan}}</td>
                 <td class="col5">{{$value.Description}}</td>
                 <td class="mac-count col6" id="mac_min-{{$key}}" onclick="handlerChangeShownColumn(this)">
-                    <span class="amount">{{len $value.Macs}} </span><img src="/assets/public/open.svg" alt="O">
+                    <span class="amount">{{len $value.Macs}} </span><img src="/snmp/assets/public/open.svg" alt="O">
                 </td>
                 <td class="macs col6" id="mac_max-{{$key}}" onclick="handlerChangeShownColumn(this)">
                     {{range $i, $mac := $value.Macs}}
@@ -41,7 +41,7 @@
         {{end}}
         </tbody>
     </table>
-    <script src="/assets/js/script.js"></script>
+    <script src="/snmp/assets/js/script.js"></script>
 </body>
 </html>
 {{ end }}

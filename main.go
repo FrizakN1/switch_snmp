@@ -25,10 +25,10 @@ func main() {
 
 	router := gin.Default()
 
-	router.LoadHTMLGlob("template/*.html")
-	router.Static("assets/", "assets/")
-
 	routerSNMP := router.Group("/snmp")
+
+	router.LoadHTMLGlob("template/*.html")
+	routerSNMP.Static("assets/", "assets/")
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
 
