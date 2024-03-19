@@ -26,7 +26,7 @@ func main() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("template/*.html")
-	router.Static("./assets/", "assets")
+	router.Static("assets/", "assets")
 
 	routerSNMP := router.Group("/snmp")
 
