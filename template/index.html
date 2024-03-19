@@ -4,68 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Eltex</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            height: max-content;
-            margin: unset;
-            flex-direction: column;
-            font-family: sans-serif, Arial;
-            font-size: 16px;
-        }
-
-        table {
-            border-collapse: collapse;
-            min-width: 60%;
-        }
-
-        td, th {
-            border: 1px solid #999999;
-            padding: 5px;
-        }
-
-        .green {
-            background-color: green;
-            color: #ffffff;
-        }
-
-        .grey {
-            background-color: grey;
-            color: #ffffff;
-        }
-
-        h1 {
-            margin-bottom: unset;
-        }
-
-        h3 span {
-            padding: 5px 10px;
-            color: #ffffff;
-        }
-
-        .bg-green {
-            background-color: #00aa00;
-        }
-
-        .bg-orange {
-            background-color: #ffa500;
-        }
-
-        .bg-red {
-            background-color: #ff0000;
-        }
-
-        .bg-black {
-            background-color: #000000;
-        }
-
-        .bg-blue {
-            background-color: #0050ff;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
     <h1>{{.SystemName}}</h1>
@@ -79,6 +18,7 @@
                 <th>Mode</th>
                 <th>Vlan</th>
                 <th>Description</th>
+                <th>Mac</th>
             </tr>
         </thead>
         <tbody>
@@ -89,10 +29,19 @@
                 <td>{{$value.Mode}}</td>
                 <td>{{$value.Vlan}}</td>
                 <td>{{$value.Description}}</td>
+                <td class="mac-count" id="mac_min-{{$key}}" onclick="handlerChangeShownColumn(this)">
+                    <span class="amount">{{len $value.Macs}} </span><img src="/assets/public/open.svg" alt="O">
+                </td>
+                <td class="macs" id="mac_max-{{$key}}" onclick="handlerChangeShownColumn(this)">
+                    {{range $i, $mac := $value.Macs}}
+                        <div>{{$mac}}</div>
+                    {{end}}
+                </td>
             </tr>
         {{end}}
         </tbody>
     </table>
+    <script src="/assets/js/script.js"></script>
 </body>
 </html>
 {{ end }}

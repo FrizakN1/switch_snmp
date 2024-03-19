@@ -17,6 +17,7 @@ type Port struct {
 	Description string
 	Mode        string
 	Speed       uint
+	Macs        []string
 }
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("template/*.html")
+	router.Static("assets/", "assets")
 
 	routerSNMP := router.Group("/snmp")
 
@@ -63,6 +65,8 @@ func handlerGetEltex(c *gin.Context) {
 
 	getPortsMode(portMap)
 
+	getMacAddresses(portMap)
+
 	systemName := getStringValue("1.3.6.1.2.1.1.5.0")
 
 	batteryStatus, colorStatus := getBatteryStatus()
@@ -88,6 +92,47 @@ func handlerGetEltex(c *gin.Context) {
 		"BatteryCharge": batteryCharge,
 		"Uptime":        uptime,
 	})
+}
+
+func getMacAddresses(portMap map[int]Port) {
+	oid := "1.3.6.1.2.1.17.7.1.2.2.1.2"
+	result, err := g.Default.BulkWalkAll(oid)
+	if err != nil {
+		fmt.Println("133: ", err)
+	}
+
+	for _, variable := range result {
+		key := variable.Value.(int)
+		port, _ := portMap[key]
+
+		macElements := strings.Split(strings.Split(variable.Name, fmt.Sprintf(".%s", oid))[1], ".")[2:8]
+		var mac string
+
+		for _, el := range macElements {
+			intEl, err := strconv.Atoi(el)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			var hexEl string
+			if intEl < 16 {
+				hexEl = "0"
+			}
+
+			hexEl += strconv.FormatInt(int64(intEl), 16)
+
+			if hexEl == "0" {
+				hexEl = "00"
+			}
+
+			mac += hexEl + "."
+		}
+
+		port.Macs = append(port.Macs, mac[0:17])
+
+		portMap[key] = port
+	}
 }
 
 func getUptime() string {
