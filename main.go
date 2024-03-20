@@ -7,7 +7,6 @@ import (
 	"snmp/settings"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -31,8 +30,61 @@ func main() {
 	routerSNMP.Static("assets/", "assets/")
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
+	routerSNMP.GET("/dgs-1100/:ip", handlerGetDGS_06)
 
 	_ = router.Run(config.Address + ":" + config.Port)
+}
+
+func handlerGetDGS_06(c *gin.Context) {
+	ip := c.Param("ip")
+
+	g.Default.Target = ip
+	g.Default.Community = "private"
+
+	fmt.Printf("start snmp dgs-1100-06 %s \n", ip)
+	err := g.Default.Connect()
+	if err != nil {
+		fmt.Println("44: ", err)
+	}
+	defer g.Default.Conn.Close()
+
+	portMap := make(map[int]Port)
+
+	getDGSPortAmount(portMap)
+
+	getDGSPortsVlan(portMap)
+
+	formatVlans(portMap)
+
+	getPortsDescription(portMap)
+
+	getPortsSpeed(portMap)
+
+	getMacAddresses(portMap)
+
+	systemName := getStringValue("1.3.6.1.2.1.1.5.0")
+
+	firmware := getStringValue("1.3.6.1.4.1.171.10.134.1.1.1.3.0")
+	if firmware == "#Ошибка" {
+		firmware = getStringValue("1.3.6.1.4.1.171.10.134.2.1.1.1.3.0")
+	}
+
+	SN := getStringValue("1.3.6.1.4.1.171.10.134.1.1.1.30.0")
+	if SN == "#Ошибка" {
+		SN = getStringValue("1.3.6.1.4.1.171.10.134.2.1.1.29.0")
+	}
+
+	uptime := getUptime()
+
+	c.HTML(200, "index", gin.H{
+		"Ports":      portMap,
+		"SystemName": systemName,
+		"SN":         SN,
+		"IP":         ip,
+		"Firmware":   firmware,
+		"Uptime":     uptime,
+		"Type":       "DGS-1100",
+	})
 }
 
 func handlerGetEltex(c *gin.Context) {
@@ -40,7 +92,7 @@ func handlerGetEltex(c *gin.Context) {
 	g.Default.Target = ip
 	g.Default.Community = "eltexstat"
 
-	fmt.Printf("start snmp %s \n", ip)
+	fmt.Printf("start snmp eltex %s \n", ip)
 
 	err := g.Default.Connect()
 	if err != nil {
@@ -50,14 +102,10 @@ func handlerGetEltex(c *gin.Context) {
 
 	portMap := make(map[int]Port)
 
-	var wg sync.WaitGroup
-
 	for i := 1; i < 5; i++ {
 		oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-		getPortsVlan(portMap, oid, i)
+		getEltexPortsVlan(portMap, oid, i)
 	}
-
-	wg.Wait()
 
 	getPortsDescription(portMap)
 
@@ -79,8 +127,6 @@ func handlerGetEltex(c *gin.Context) {
 
 	uptime := getUptime()
 
-	wg.Wait()
-
 	c.HTML(200, "index", gin.H{
 		"Ports":         portMap,
 		"SystemName":    systemName,
@@ -91,7 +137,170 @@ func handlerGetEltex(c *gin.Context) {
 		"Firmware":      firmware,
 		"BatteryCharge": batteryCharge,
 		"Uptime":        uptime,
+		"Type":          "Eltex MES",
 	})
+}
+
+func formatVlans(portMap map[int]Port) {
+	for key, port := range portMap {
+		if len(port.Vlan) > 0 {
+			vlansStringArray := strings.Split(port.Vlan[:len(port.Vlan)-1], ",")
+			vlans := make([]int, 0)
+
+			for _, vlanString := range vlansStringArray {
+				vlanInt, err := strconv.Atoi(vlanString)
+				if err != nil {
+					fmt.Println("144: ", err)
+					return
+				}
+
+				vlans = append(vlans, vlanInt)
+			}
+
+			port.Vlan = formatRanges(vlans)
+
+			portMap[key] = port
+		}
+	}
+}
+
+func getDGSPortsVlan(portMap map[int]Port) {
+	oid := "1.3.6.1.2.1.17.7.1.4.3.1.2"
+	result, err := g.Default.BulkWalkAll(oid)
+	if err != nil {
+		fmt.Println("133: ", err)
+		return
+	}
+
+	for _, variable := range result {
+		vlan := strings.Split(variable.Name, oid)[1][1:]
+
+		fieldsArr, ok := variable.Value.([]byte)
+		if ok {
+			portNumber := 0
+
+			for _, item := range fieldsArr {
+				if item == 0 {
+					portNumber += 8
+				} else if item < 16 {
+					portNumber += 4
+					field := strconv.FormatInt(int64(item), 2)
+					portNumber += 4 - len(field)
+					for _, char := range field {
+						portNumber++
+						if char == '1' {
+							port, _ := portMap[portNumber]
+							port.Vlan += vlan + ","
+							port.Mode = "trunk"
+							portMap[portNumber] = port
+						}
+					}
+				} else {
+					hexString := strconv.FormatInt(int64(item), 16)
+					for _, el := range strings.Split(hexString, "") {
+						if el != "0" {
+							field, err := hexToBinary(el)
+							if err != nil {
+								fmt.Println("299: ", err)
+							}
+
+							portNumber += 4 - len(field)
+							for _, char := range field {
+								portNumber++
+								if char == '1' {
+									port, _ := portMap[portNumber]
+									port.Vlan += vlan + ","
+									port.Mode = "trunk"
+									portMap[portNumber] = port
+								}
+							}
+						} else {
+							portNumber += 4
+						}
+					}
+				}
+			}
+		}
+	}
+
+	oid = "1.3.6.1.2.1.17.7.1.4.3.1.4"
+	result, err = g.Default.BulkWalkAll(oid)
+	if err != nil {
+		fmt.Println("133: ", err)
+		return
+	}
+
+	for _, variable := range result {
+		fieldsArr, ok := variable.Value.([]byte)
+		if ok {
+			portNumber := 0
+
+			for _, item := range fieldsArr {
+				if item == 0 {
+					portNumber += 8
+				} else if item < 16 {
+					portNumber += 4
+					field := strconv.FormatInt(int64(item), 2)
+					portNumber += 4 - len(field)
+					for _, char := range field {
+						portNumber++
+						if char == '1' {
+							port, _ := portMap[portNumber]
+							port.Mode = "access"
+							portMap[portNumber] = port
+						}
+					}
+				} else {
+					hexString := strconv.FormatInt(int64(item), 16)
+					for _, el := range strings.Split(hexString, "") {
+						if el != "0" {
+							field, err := hexToBinary(el)
+							if err != nil {
+								fmt.Println("299: ", err)
+							}
+
+							portNumber += 4 - len(field)
+							for _, char := range field {
+								portNumber++
+								if char == '1' {
+									port, _ := portMap[portNumber]
+									port.Mode = "access"
+									portMap[portNumber] = port
+								}
+							}
+						} else {
+							portNumber += 4
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func getDGSPortAmount(portMap map[int]Port) {
+	result, err := g.Default.Get([]string{"1.3.6.1.2.1.2.1.0"})
+	if err != nil {
+		fmt.Println("226: ", err)
+	}
+
+	amount := result.Variables[0].Value.(int)
+
+	_result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.2.2.1.1")
+	if err != nil {
+		fmt.Println("133: ", err)
+		return
+	}
+
+	for _, variable := range _result {
+		value := variable.Value.(int)
+
+		if value > amount {
+			break
+		}
+
+		portMap[value] = Port{}
+	}
 }
 
 func getMacAddresses(portMap map[int]Port) {
@@ -181,14 +390,15 @@ func getStringValue(oid string) string {
 	result, err := g.Default.Get([]string{oid})
 	if err != nil {
 		fmt.Println("133: ", err)
-	}
-
-	if len(result.Variables) > 0 {
-		bytes := result.Variables[0].Value.([]byte)
-		return string(bytes)
-	} else {
 		return "#Ошибка"
 	}
+
+	if result.Variables[0].Value != nil {
+		bytes := result.Variables[0].Value.([]byte)
+		return string(bytes)
+	}
+
+	return "#Ошибка"
 }
 
 func getBatteryStatus() (string, string) {
@@ -350,7 +560,7 @@ func getPortsDescription(portMap map[int]Port) {
 	}
 }
 
-func getPortsVlan(portMap map[int]Port, oid string, step int) {
+func getEltexPortsVlan(portMap map[int]Port, oid string, step int) {
 	result, err := g.Default.BulkWalkAll(oid) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
 		fmt.Println("254: ", err)
@@ -382,39 +592,37 @@ func getPortsVlan(portMap map[int]Port, oid string, step int) {
 			for _, item := range fieldArr {
 				if item == 0 {
 					vlan += 8
-				} else {
-					if item < 16 {
-						vlan += 4
-						field := strconv.FormatInt(int64(item), 2)
-						vlan += 4 - len(field)
-						for _, char := range field {
-							vlan++
-							if char == '1' {
-								vlans = append(vlans, vlan)
-							}
-						}
-					} else {
-						hexString := strconv.FormatInt(int64(item), 16)
-						for _, el := range strings.Split(hexString, "") {
-							if el != "0" {
-								field, err := hexToBinary(el)
-								if err != nil {
-									fmt.Println("299: ", err)
-								}
+				} else if item < 16 {
 
-								vlan += 4 - len(field)
-								for _, char := range field {
-									vlan++
-									if char == '1' {
-										vlans = append(vlans, vlan)
-									}
-								}
-							} else {
-								vlan += 4
-							}
+					vlan += 4
+					field := strconv.FormatInt(int64(item), 2)
+					vlan += 4 - len(field)
+					for _, char := range field {
+						vlan++
+						if char == '1' {
+							vlans = append(vlans, vlan)
 						}
 					}
+				} else {
+					hexString := strconv.FormatInt(int64(item), 16)
+					for _, el := range strings.Split(hexString, "") {
+						if el != "0" {
+							field, err := hexToBinary(el)
+							if err != nil {
+								fmt.Println("299: ", err)
+							}
 
+							vlan += 4 - len(field)
+							for _, char := range field {
+								vlan++
+								if char == '1' {
+									vlans = append(vlans, vlan)
+								}
+							}
+						} else {
+							vlan += 4
+						}
+					}
 				}
 			}
 
