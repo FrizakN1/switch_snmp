@@ -30,17 +30,16 @@ func main() {
 	routerSNMP.Static("assets/", "assets/")
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
-	routerSNMP.GET("/dgs/:community/:ip", handlerGetDGS)
+	routerSNMP.GET("/dgs/:ip", handlerGetDGS)
 
 	_ = router.Run(config.Address + ":" + config.Port)
 }
 
 func handlerGetDGS(c *gin.Context) {
 	ip := c.Param("ip")
-	community := c.Param("community")
 
 	g.Default.Target = ip
-	g.Default.Community = community
+	g.Default.Community = "dlinkstat"
 
 	fmt.Printf("start snmp dgs %s \n", ip)
 	err := g.Default.Connect()
@@ -89,7 +88,7 @@ func handlerGetDGS(c *gin.Context) {
 		"IP":         ip,
 		"Firmware":   firmware,
 		"Uptime":     uptime,
-		"Type":       "DGS-1100",
+		"Type":       "DGS",
 	})
 }
 
