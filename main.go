@@ -39,9 +39,9 @@ func handlerGetDGS_06(c *gin.Context) {
 	ip := c.Param("ip")
 
 	g.Default.Target = ip
-	g.Default.Community = "private"
+	g.Default.Community = "public"
 
-	fmt.Printf("start snmp dgs-1100-06 %s \n", ip)
+	fmt.Printf("start snmp dgs-1100 %s \n", ip)
 	err := g.Default.Connect()
 	if err != nil {
 		fmt.Println("44: ", err)
