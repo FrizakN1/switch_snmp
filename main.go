@@ -45,12 +45,17 @@ func handlerGetDGS_06(c *gin.Context) {
 	err := g.Default.Connect()
 	if err != nil {
 		fmt.Println("44: ", err)
+		return
 	}
 	defer g.Default.Conn.Close()
 
 	portMap := make(map[int]Port)
 
-	getDGSPortAmount(portMap)
+	err = getDGSPortAmount(portMap)
+	if err != nil {
+		c.HTML(200, "error", nil)
+		return
+	}
 
 	getDGSPortsVlan(portMap)
 
@@ -97,6 +102,7 @@ func handlerGetEltex(c *gin.Context) {
 	err := g.Default.Connect()
 	if err != nil {
 		fmt.Println("44: ", err)
+		return
 	}
 	defer g.Default.Conn.Close()
 
@@ -104,7 +110,11 @@ func handlerGetEltex(c *gin.Context) {
 
 	for i := 1; i < 5; i++ {
 		oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-		getEltexPortsVlan(portMap, oid, i)
+		err = getEltexPortsVlan(portMap, oid, i)
+		if err != nil {
+			c.HTML(200, "error", nil)
+			return
+		}
 	}
 
 	getPortsDescription(portMap)
@@ -278,29 +288,34 @@ func getDGSPortsVlan(portMap map[int]Port) {
 	}
 }
 
-func getDGSPortAmount(portMap map[int]Port) {
+func getDGSPortAmount(portMap map[int]Port) error {
 	result, err := g.Default.Get([]string{"1.3.6.1.2.1.2.1.0"})
 	if err != nil {
 		fmt.Println("226: ", err)
+		return err
 	}
 
-	amount := result.Variables[0].Value.(int)
+	if result.Variables[0].Value != nil {
+		amount := result.Variables[0].Value.(int)
 
-	_result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.2.2.1.1")
-	if err != nil {
-		fmt.Println("133: ", err)
-		return
-	}
-
-	for _, variable := range _result {
-		value := variable.Value.(int)
-
-		if value > amount {
-			break
+		_result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.2.2.1.1")
+		if err != nil {
+			fmt.Println("133: ", err)
+			return err
 		}
 
-		portMap[value] = Port{}
+		for _, variable := range _result {
+			value := variable.Value.(int)
+
+			if value > amount {
+				break
+			}
+
+			portMap[value] = Port{}
+		}
 	}
+
+	return nil
 }
 
 func getMacAddresses(portMap map[int]Port) {
@@ -308,6 +323,7 @@ func getMacAddresses(portMap map[int]Port) {
 	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
+		return
 	}
 
 	for _, variable := range result {
@@ -348,6 +364,7 @@ func getUptime() string {
 	result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
+		return "Неизвестно"
 	}
 
 	if len(result) > 0 {
@@ -376,6 +393,7 @@ func getBatteryCharge() int {
 	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
+		return 255
 	}
 
 	if len(result) > 0 {
@@ -383,7 +401,7 @@ func getBatteryCharge() int {
 		return value
 	}
 
-	return -1
+	return 255
 }
 
 func getStringValue(oid string) string {
@@ -405,6 +423,7 @@ func getBatteryStatus() (string, string) {
 	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
 	if err != nil {
 		fmt.Println("80: ", err)
+		return "Неизвестно", "black"
 	}
 
 	var batteryStatus string
@@ -459,6 +478,7 @@ func getPortsMode(portMap map[int]Port) {
 	result, err := g.Default.Get(portModeOids)
 	if err != nil {
 		fmt.Println("149: ", err)
+		return
 	}
 
 	for _, variable := range result.Variables {
@@ -507,6 +527,7 @@ func getPortsSpeed(portMap map[int]Port) {
 	result, err := g.Default.Get(portSpeedOids)
 	if err != nil {
 		fmt.Println("197: ", err)
+		return
 	}
 
 	for _, variable := range result.Variables {
@@ -540,6 +561,7 @@ func getPortsDescription(portMap map[int]Port) {
 	result, err := g.Default.Get(portDescOids)
 	if err != nil {
 		fmt.Println("230: ", err)
+		return
 	}
 
 	for _, variable := range result.Variables {
@@ -560,10 +582,11 @@ func getPortsDescription(portMap map[int]Port) {
 	}
 }
 
-func getEltexPortsVlan(portMap map[int]Port, oid string, step int) {
+func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
 	result, err := g.Default.BulkWalkAll(oid) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
 		fmt.Println("254: ", err)
+		return err
 	}
 
 	for i, variable := range result {
@@ -571,11 +594,11 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) {
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
 		if err != nil {
 			fmt.Println("260: ", err)
-			return
+			return err
 		}
 
 		if key > 108 {
-			return
+			return nil
 		}
 
 		port, _ := portMap[key]
@@ -610,6 +633,7 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) {
 							field, err := hexToBinary(el)
 							if err != nil {
 								fmt.Println("299: ", err)
+								return err
 							}
 
 							vlan += 4 - len(field)
@@ -634,6 +658,8 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) {
 		}
 		portMap[key] = port
 	}
+
+	return nil
 }
 
 func formatRanges(numbers []int) string {

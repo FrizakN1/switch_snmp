@@ -9,7 +9,7 @@
 <body>
     <h1>{{.SystemName}}</h1>
     <h3>IP: {{.IP}} | Версия ПО: {{.Firmware}} | S/N: {{.SN}} {{if eq .Type "Eltex MES"}}| Состояние АКБ: <span class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</span>
-        {{if gt .BatteryCharge -1}}| Заряд АКБ:  {{.BatteryCharge}} {{end}}{{end}}| Время работы: {{.Uptime}}</h3>
+        {{if ne .BatteryCharge 255}}| Заряд АКБ:  {{.BatteryCharge}} {{end}}{{end}}| Время работы: {{.Uptime}}</h3>
     <table>
         <thead>
             <tr>
