@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	g "github.com/gosnmp/gosnmp"
 	"snmp/settings"
+	"snmp/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -19,8 +21,30 @@ type Port struct {
 	Macs        []string
 }
 
+type Aliases struct {
+	Mac map[string]Mac `json:"aliases"`
+}
+
+type Mac struct {
+	IPAddress string `json:"IPAddress"`
+	Comment   string `json:"Comment"`
+}
+
+var aliases Aliases
+
 func main() {
 	config := settings.Load("settings/settings.json")
+
+	bytes, e := utils.LoadFile("./aliases.json")
+	if e != nil {
+		fmt.Println(e)
+		return
+	}
+	e = json.Unmarshal(bytes, &aliases)
+	if e != nil {
+		fmt.Println(e)
+		return
+	}
 
 	router := gin.Default()
 
@@ -354,10 +378,12 @@ func getMacAddresses(portMap map[int]Port) {
 					hexEl = "00"
 				}
 
-				mac += hexEl + "."
+				mac += hexEl + ":"
 			}
 
-			port.Macs = append(port.Macs, mac[0:17])
+			macStr := fmt.Sprintf("%s | %s - %s", mac[0:17], aliases.Mac[mac[0:17]].IPAddress, aliases.Mac[mac[0:17]].Comment)
+
+			port.Macs = append(port.Macs, macStr)
 
 			portMap[key] = port
 		}
