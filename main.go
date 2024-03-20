@@ -30,18 +30,19 @@ func main() {
 	routerSNMP.Static("assets/", "assets/")
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
-	routerSNMP.GET("/dgs-1100/:ip", handlerGetDGS_06)
+	routerSNMP.GET("/dgs/:community/:ip", handlerGetDGS)
 
 	_ = router.Run(config.Address + ":" + config.Port)
 }
 
-func handlerGetDGS_06(c *gin.Context) {
+func handlerGetDGS(c *gin.Context) {
 	ip := c.Param("ip")
+	community := c.Param("community")
 
 	g.Default.Target = ip
-	g.Default.Community = "public"
+	g.Default.Community = community
 
-	fmt.Printf("start snmp dgs-1100 %s \n", ip)
+	fmt.Printf("start snmp dgs %s \n", ip)
 	err := g.Default.Connect()
 	if err != nil {
 		fmt.Println("44: ", err)
@@ -311,7 +312,9 @@ func getDGSPortAmount(portMap map[int]Port) error {
 				break
 			}
 
-			portMap[value] = Port{}
+			portMap[value] = Port{
+				Index: value,
+			}
 		}
 	}
 
@@ -328,35 +331,37 @@ func getMacAddresses(portMap map[int]Port) {
 
 	for _, variable := range result {
 		key := variable.Value.(int)
-		port, _ := portMap[key]
+		if key != 0 {
+			port, _ := portMap[key]
 
-		macElements := strings.Split(strings.Split(variable.Name, fmt.Sprintf(".%s", oid))[1], ".")[2:8]
-		var mac string
+			macElements := strings.Split(strings.Split(variable.Name, fmt.Sprintf(".%s", oid))[1], ".")[2:8]
+			var mac string
 
-		for _, el := range macElements {
-			intEl, err := strconv.Atoi(el)
-			if err != nil {
-				fmt.Println(err)
-				return
+			for _, el := range macElements {
+				intEl, err := strconv.Atoi(el)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				var hexEl string
+				if intEl < 16 {
+					hexEl = "0"
+				}
+
+				hexEl += strconv.FormatInt(int64(intEl), 16)
+
+				if hexEl == "0" {
+					hexEl = "00"
+				}
+
+				mac += hexEl + "."
 			}
 
-			var hexEl string
-			if intEl < 16 {
-				hexEl = "0"
-			}
+			port.Macs = append(port.Macs, mac[0:17])
 
-			hexEl += strconv.FormatInt(int64(intEl), 16)
-
-			if hexEl == "0" {
-				hexEl = "00"
-			}
-
-			mac += hexEl + "."
+			portMap[key] = port
 		}
-
-		port.Macs = append(port.Macs, mac[0:17])
-
-		portMap[key] = port
 	}
 }
 
