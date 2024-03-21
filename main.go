@@ -55,8 +55,43 @@ func main() {
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
 	routerSNMP.GET("/dgs/:ip", handlerGetDGS)
+	routerSNMP.POST("/dgs/change_port_description/:ip", handlerDGSChangePortDescription)
 
 	_ = router.Run(config.Address + ":" + config.Port)
+}
+
+func handlerDGSChangePortDescription(c *gin.Context) {
+	ip := c.Param("ip")
+
+	var port Port
+	err := c.BindJSON(&port)
+	if err != nil {
+		fmt.Println("BindJSON: ", err)
+		return
+	}
+
+	g.Default.Target = ip
+	g.Default.Community = "1connemwrdat"
+
+	err = g.Default.Connect()
+	if err != nil {
+		fmt.Println("44: ", err)
+		return
+	}
+	defer g.Default.Conn.Close()
+
+	oid := fmt.Sprintf("1.3.6.1.2.1.31.1.1.1.18.%d", port.Index)
+
+	param := []g.SnmpPDU{{Name: oid, Value: port.Description, Type: g.OctetString}}
+	_, err = g.Default.Set(param)
+	if err != nil {
+		fmt.Println("133: ", err)
+		c.JSON(200, false)
+		c.Abort()
+		return
+	}
+
+	c.JSON(200, true)
 }
 
 func handlerGetDGS(c *gin.Context) {

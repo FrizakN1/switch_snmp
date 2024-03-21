@@ -73,7 +73,7 @@ h3 span {
     margin-bottom: unset;
 }
 
-img {
+.mac-count img {
     transform: rotate(180deg);
     width: 15px;
 }
@@ -102,6 +102,26 @@ img {
     width: 37%;
 }.col5 {
     width: 37%;
+    padding-right: 32px;
+    position: relative;
 }.col6 {
     width: 11%;
+}
+
+.col5 img {
+    position: absolute;
+    cursor: pointer;
+    width: 23px;
+    right: 5px;
+    top: 4px;
+}
+
+.col5 input {
+    display: inline-block;
+    width: 70%;
+}
+
+.col5 button {
+    display: inline-block;
+    width: 20%;
 }
