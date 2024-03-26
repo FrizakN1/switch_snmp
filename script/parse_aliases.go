@@ -84,7 +84,7 @@ func parseVLAN(path string) (map[string]Mac, error) {
 				var macFin string
 
 				if !file1.IsDir() {
-					if len(ipContent) > 4 {
+					if len(ipContent) > 20 {
 						if isValidIP(strings.TrimRight(file1.Name(), ".comment")) {
 							ipAddr = strings.TrimRight(file1.Name(), ".comment")
 

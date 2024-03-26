@@ -28,7 +28,12 @@ function handlerTransformColumn(el) {
 
 function handlerSendChange(key) {
     let value = document.querySelector(`#input-${key}`).value
-    let ip = window.location.href.split("snmp/dgs/")[1]
+    let ip
+    if (window.location.href.includes("dgs")) {
+        ip = window.location.href.split("snmp/dgs/")[1]
+    } else if (window.location.href.includes("eltex")) {
+        ip = window.location.href.split("snmp/eltex/")[1]
+    }
 
     let options = {
         method: "POST",
