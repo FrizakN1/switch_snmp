@@ -48,7 +48,6 @@ function handlerSendChange(key) {
     fetch("/snmp/dgs/change_port_description/"+ip, options)
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             if (data) {
                 let col = document.querySelector(`#description-${key}`)
                 col.innerHTML = `${value} <img onclick="handlerTransformColumn(this)" src="/snmp/assets/public/pen.svg" alt="O">`
