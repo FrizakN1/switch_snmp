@@ -32,9 +32,7 @@ function handlerSendChange(key) {
     if (window.location.href.includes("dgs")) {
         ip = window.location.href.split("snmp/dgs/")[1]
     } else if (window.location.href.includes("eltex")) {
-        alert("у элексов, пока что, не прописаны права на редактирование")
-        return
-        //ip = window.location.href.split("snmp/eltex/")[1]
+        ip = window.location.href.split("snmp/eltex/")[1]
     }
 
     let options = {
