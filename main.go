@@ -598,21 +598,26 @@ func getPortsSpeed(portMap map[int]Port) {
 	var combinedResult []g.SnmpPDU
 
 	if len(portSpeedOids) > 25 {
-		result, err := g.Default.GetNext(portSpeedOids[:25])
+
+		fmt.Println(portSpeedOids[:25])
+		fmt.Println(portSpeedOids[25:])
+		result, err := g.Default.Get(portSpeedOids[:25])
 		if err != nil {
 			fmt.Println("197: ", err)
 			return
 		}
 
-		_result, err := g.Default.GetNext(portSpeedOids[25:])
+		_result, err := g.Default.Get(portSpeedOids[25:])
 		if err != nil {
 			fmt.Println("197: ", err)
 			return
 		}
 
 		combinedResult = append(result.Variables, _result.Variables...)
+
+		fmt.Println(combinedResult)
 	} else {
-		result, err := g.Default.GetNext(portSpeedOids)
+		result, err := g.Default.Get(portSpeedOids)
 		if err != nil {
 			fmt.Println("197: ", err)
 			return
