@@ -131,11 +131,17 @@ func handlerGetDGS(c *gin.Context) {
 	firmware := getStringValue("1.3.6.1.4.1.171.10.134.1.1.1.3.0")
 	if firmware == "#Ошибка" {
 		firmware = getStringValue("1.3.6.1.4.1.171.10.134.2.1.1.1.3.0")
+		if firmware == "#Ошибка" {
+			firmware = getStringValue("1.3.6.1.4.1.171.15.3.1.4.0")
+		}
 	}
 
 	SN := getStringValue("1.3.6.1.4.1.171.10.134.1.1.1.30.0")
 	if SN == "#Ошибка" {
 		SN = getStringValue("1.3.6.1.4.1.171.10.134.2.1.1.29.0")
+		if SN == "#Ошибка" {
+			SN = getStringValue("1.3.6.1.4.1.171.15.3.1.6.0")
+		}
 	}
 
 	uptime := getUptime()
@@ -235,7 +241,7 @@ func formatVlans(portMap map[int]Port) {
 
 func getDGSPortsVlan(portMap map[int]Port) {
 	oid := "1.3.6.1.2.1.17.7.1.4.3.1.2"
-	result, err := g.Default.BulkWalkAll(oid)
+	result, err := g.Default.WalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -293,7 +299,7 @@ func getDGSPortsVlan(portMap map[int]Port) {
 	}
 
 	oid = "1.3.6.1.2.1.17.7.1.4.3.1.4"
-	result, err = g.Default.BulkWalkAll(oid)
+	result, err = g.Default.WalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -357,7 +363,7 @@ func getDGSPortAmount(portMap map[int]Port) error {
 	if result.Variables[0].Value != nil {
 		amount := result.Variables[0].Value.(int)
 
-		_result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.2.2.1.1")
+		_result, err := g.Default.WalkAll("1.3.6.1.2.1.2.2.1.1")
 		if err != nil {
 			fmt.Println("133: ", err)
 			return err
@@ -366,7 +372,7 @@ func getDGSPortAmount(portMap map[int]Port) error {
 		for _, variable := range _result {
 			value := variable.Value.(int)
 
-			if value > amount {
+			if value > amount || value > 1000 {
 				break
 			}
 
@@ -381,7 +387,7 @@ func getDGSPortAmount(portMap map[int]Port) error {
 
 func getMacAddresses(portMap map[int]Port) {
 	oid := "1.3.6.1.2.1.17.7.1.2.2.1.2"
-	result, err := g.Default.BulkWalkAll(oid)
+	result, err := g.Default.WalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -426,7 +432,7 @@ func getMacAddresses(portMap map[int]Port) {
 }
 
 func getUptime() string {
-	result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.1.3")
+	result, err := g.Default.WalkAll("1.3.6.1.2.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
 		return "Неизвестно"
@@ -455,7 +461,7 @@ func getUptime() string {
 }
 
 func getBatteryCharge() int {
-	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
+	result, err := g.Default.WalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
 		return 255
@@ -485,7 +491,7 @@ func getStringValue(oid string) string {
 }
 
 func getBatteryStatus() (string, string) {
-	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
+	result, err := g.Default.WalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
 	if err != nil {
 		fmt.Println("80: ", err)
 		return "Неизвестно", "black"
@@ -583,19 +589,39 @@ func getPortsMode(portMap map[int]Port) {
 
 func getPortsSpeed(portMap map[int]Port) {
 	portSpeedOids := make([]string, 0)
-
+	//1.3.6.1.2.1.31.1.1.1.15.
 	for key, _ := range portMap {
-		oid := "1.3.6.1.2.1.31.1.1.1.15." + strconv.Itoa(key)
+		oid := "1.3.6.1.2.1.2.2.1.5." + strconv.Itoa(key)
 		portSpeedOids = append(portSpeedOids, oid)
 	}
 
-	result, err := g.Default.Get(portSpeedOids)
-	if err != nil {
-		fmt.Println("197: ", err)
-		return
+	var combinedResult []g.SnmpPDU
+
+	if len(portSpeedOids) > 25 {
+		result, err := g.Default.GetNext(portSpeedOids[:25])
+		if err != nil {
+			fmt.Println("197: ", err)
+			return
+		}
+
+		_result, err := g.Default.GetNext(portSpeedOids[25:])
+		if err != nil {
+			fmt.Println("197: ", err)
+			return
+		}
+
+		combinedResult = append(result.Variables, _result.Variables...)
+	} else {
+		result, err := g.Default.GetNext(portSpeedOids)
+		if err != nil {
+			fmt.Println("197: ", err)
+			return
+		}
+
+		combinedResult = result.Variables
 	}
 
-	for _, variable := range result.Variables {
+	for _, variable := range combinedResult {
 		oidParts := strings.Split(variable.Name, ".")
 
 		key, err := strconv.Atoi(oidParts[len(oidParts)-1])
@@ -609,6 +635,9 @@ func getPortsSpeed(portMap map[int]Port) {
 		intValue, ok := variable.Value.(uint)
 		if ok {
 			port.Speed = intValue
+			if intValue != 0 {
+				port.Speed = intValue / 1000000
+			}
 		}
 
 		portMap[key] = port
@@ -648,7 +677,7 @@ func getPortsDescription(portMap map[int]Port) {
 }
 
 func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
-	result, err := g.Default.BulkWalkAll(oid) // Get() accepts up to g.MAX_OIDS
+	result, err := g.Default.WalkAll(oid) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
 		fmt.Println("254: ", err)
 		return err
