@@ -598,9 +598,6 @@ func getPortsSpeed(portMap map[int]Port) {
 	var combinedResult []g.SnmpPDU
 
 	if len(portSpeedOids) > 25 {
-
-		fmt.Println(portSpeedOids[:25])
-		fmt.Println(portSpeedOids[25:])
 		result, err := g.Default.Get(portSpeedOids[:25])
 		if err != nil {
 			fmt.Println("197: ", err)
@@ -614,8 +611,6 @@ func getPortsSpeed(portMap map[int]Port) {
 		}
 
 		combinedResult = append(result.Variables, _result.Variables...)
-
-		fmt.Println(combinedResult)
 	} else {
 		result, err := g.Default.Get(portSpeedOids)
 		if err != nil {
