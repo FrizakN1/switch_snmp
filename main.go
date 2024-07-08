@@ -369,6 +369,14 @@ func getDGSPortAmount(portMap map[int]Port) error {
 			return err
 		}
 
+		if len(_result) == 0 {
+			_result, err = g.Default.WalkAll("1.3.6.1.2.1.2.2.1.1")
+			if err != nil {
+				fmt.Println("133: ", err)
+				return err
+			}
+		}
+
 		for _, variable := range _result {
 			value := variable.Value.(int)
 
