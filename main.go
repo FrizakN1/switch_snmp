@@ -241,7 +241,7 @@ func formatVlans(portMap map[int]Port) {
 
 func getDGSPortsVlan(portMap map[int]Port) {
 	oid := "1.3.6.1.2.1.17.7.1.4.3.1.2"
-	result, err := g.Default.WalkAll(oid)
+	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -299,7 +299,7 @@ func getDGSPortsVlan(portMap map[int]Port) {
 	}
 
 	oid = "1.3.6.1.2.1.17.7.1.4.3.1.4"
-	result, err = g.Default.WalkAll(oid)
+	result, err = g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -363,7 +363,7 @@ func getDGSPortAmount(portMap map[int]Port) error {
 	if result.Variables[0].Value != nil {
 		amount := result.Variables[0].Value.(int)
 
-		_result, err := g.Default.WalkAll("1.3.6.1.2.1.2.2.1.1")
+		_result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.2.2.1.1")
 		if err != nil {
 			fmt.Println("133: ", err)
 			return err
@@ -387,7 +387,7 @@ func getDGSPortAmount(portMap map[int]Port) error {
 
 func getMacAddresses(portMap map[int]Port) {
 	oid := "1.3.6.1.2.1.17.7.1.2.2.1.2"
-	result, err := g.Default.WalkAll(oid)
+	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return
@@ -432,7 +432,7 @@ func getMacAddresses(portMap map[int]Port) {
 }
 
 func getUptime() string {
-	result, err := g.Default.WalkAll("1.3.6.1.2.1.1.3")
+	result, err := g.Default.BulkWalkAll("1.3.6.1.2.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
 		return "Неизвестно"
@@ -461,7 +461,7 @@ func getUptime() string {
 }
 
 func getBatteryCharge() int {
-	result, err := g.Default.WalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
+	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
 	if err != nil {
 		fmt.Println("133: ", err)
 		return 255
@@ -491,7 +491,7 @@ func getStringValue(oid string) string {
 }
 
 func getBatteryStatus() (string, string) {
-	result, err := g.Default.WalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
+	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
 	if err != nil {
 		fmt.Println("80: ", err)
 		return "Неизвестно", "black"
@@ -677,7 +677,7 @@ func getPortsDescription(portMap map[int]Port) {
 }
 
 func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
-	result, err := g.Default.WalkAll(oid) // Get() accepts up to g.MAX_OIDS
+	result, err := g.Default.BulkWalkAll(oid) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
 		fmt.Println("254: ", err)
 		return err
