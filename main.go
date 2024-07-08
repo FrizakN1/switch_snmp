@@ -409,6 +409,14 @@ func getMacAddresses(portMap map[int]Port) {
 		return
 	}
 
+	if len(result) == 0 {
+		result, err = g.Default.WalkAll(oid)
+		if err != nil {
+			fmt.Println("133: ", err)
+			return
+		}
+	}
+
 	for _, variable := range result {
 		key := variable.Value.(int)
 		if key != 0 {
