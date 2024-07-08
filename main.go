@@ -247,6 +247,14 @@ func getDGSPortsVlan(portMap map[int]Port) {
 		return
 	}
 
+	if len(result) == 0 {
+		result, err = g.Default.WalkAll(oid)
+		if err != nil {
+			fmt.Println("133: ", err)
+			return
+		}
+	}
+
 	for _, variable := range result {
 		vlan := strings.Split(variable.Name, oid)[1][1:]
 
