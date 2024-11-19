@@ -281,7 +281,7 @@ func getMacAddresses(portMap map[int]Port, switchModel string) {
 }
 
 func getUptime() string {
-	result, err := g.Default.GetNext([]string{"1.3.6.1.2.1.1.3"})
+	result, err := g.Default.Get([]string{"1.3.6.1.2.1.1.3.0"})
 	if err != nil {
 		fmt.Println("133: ", err)
 		return "Неизвестно"
@@ -310,7 +310,7 @@ func getUptime() string {
 }
 
 func getStringValue(oid string) string {
-	result, err := g.Default.GetNext([]string{oid})
+	result, err := g.Default.Get([]string{oid})
 	if err != nil {
 		fmt.Println("133: ", err)
 		return "#Ошибка"
