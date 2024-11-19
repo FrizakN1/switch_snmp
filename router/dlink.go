@@ -225,7 +225,7 @@ func handlerDGSChangePortDescription(c *gin.Context) {
 	}
 
 	g.Default.Target = ip
-	g.Default.Community = "1connemwrdat"
+	g.Default.Community = config.ReadWriteCommunity
 
 	err = g.Default.Connect()
 	if err != nil {
@@ -279,7 +279,7 @@ func handlerGetDGS(c *gin.Context) {
 	ip := c.Param("ip")
 
 	g.Default.Target = ip
-	g.Default.Community = "dlinkstat"
+	g.Default.Community = config.DlinkReadOnlyCommunity
 
 	fmt.Printf("start snmp dgs %s \n", ip)
 	err := g.Default.Connect()

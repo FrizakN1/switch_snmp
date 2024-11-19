@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	g "github.com/gosnmp/gosnmp"
+	"snmp/settings"
 	"snmp/utils"
 	"strconv"
 	"strings"
@@ -206,8 +207,12 @@ func InitializationAliases() error {
 	return nil
 }
 
-func Initialization() *gin.Engine {
+var config *settings.Setting
+
+func Initialization(_config *settings.Setting) *gin.Engine {
 	router := gin.Default()
+
+	config = _config
 
 	routerSNMP := router.Group("/snmp")
 

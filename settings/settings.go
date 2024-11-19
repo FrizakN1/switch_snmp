@@ -7,13 +7,11 @@ import (
 )
 
 type Setting struct {
-	Address string
-	Port    string
-	DbHost  string
-	DbPort  string
-	DbUser  string
-	DbPass  string
-	DbName  string
+	Address                string
+	Port                   string
+	EltexReadOnlyCommunity string
+	DlinkReadOnlyCommunity string
+	ReadWriteCommunity     string
 }
 
 var settings Setting

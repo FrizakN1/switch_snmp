@@ -203,7 +203,7 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
 func handlerGetEltex(c *gin.Context) {
 	ip := c.Param("ip")
 	g.Default.Target = ip
-	g.Default.Community = "eltexstat"
+	g.Default.Community = config.EltexReadOnlyCommunity
 
 	fmt.Printf("start snmp eltex %s \n", ip)
 

@@ -15,5 +15,5 @@ func main() {
 		return
 	}
 
-	_ = router.Initialization().Run(config.Address + ":" + config.Port)
+	_ = router.Initialization(config).Run(config.Address + ":" + config.Port)
 }
