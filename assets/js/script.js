@@ -28,9 +28,12 @@ function handlerTransformColumn(el) {
 
 function handlerSendChange(key) {
     let value = document.querySelector(`#input-${key}`).value
+    let switchModel = document.querySelector("h1").innerHTML.match(/\(([^)]+)\)/)[1]
+
     let ip
-    if (window.location.href.includes("dgs")) {
-        ip = window.location.href.split("snmp/dgs/")[1]
+
+    if (window.location.href.includes("dlink")) {
+        ip = window.location.href.split("snmp/dlink/")[1]
     } else if (window.location.href.includes("eltex")) {
         ip = window.location.href.split("snmp/eltex/")[1]
     }
@@ -39,11 +42,12 @@ function handlerSendChange(key) {
         method: "POST",
         body: JSON.stringify({
             Index: Number(key),
-            Description: value
+            Description: value,
+            SwitchModel: switchModel
         })
     }
 
-    fetch("/snmp/dgs/change_port_description/"+ip, options)
+    fetch("/snmp/dlink/change_port_description/"+ip, options)
         .then(response => response.json())
         .then(data => {
             if (data) {
