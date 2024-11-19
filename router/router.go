@@ -310,7 +310,7 @@ func getUptime() string {
 }
 
 func getStringValue(oid string) string {
-	result, err := g.Default.Get([]string{oid})
+	result, err := g.Default.GetNext([]string{oid})
 	if err != nil {
 		fmt.Println("133: ", err)
 		return "#Ошибка"
