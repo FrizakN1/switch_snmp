@@ -17,7 +17,7 @@ func formatVlans(portMap map[int]Port) {
 			for _, vlanString := range vlansStringArray {
 				vlanInt, err := strconv.Atoi(vlanString)
 				if err != nil {
-					fmt.Println("144: ", err)
+					fmt.Println("20: ", err)
 					return
 				}
 
@@ -44,7 +44,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 		result, err = g.Default.BulkWalkAll(oid)
 	}
 	if err != nil {
-		fmt.Println("230: ", err)
+		fmt.Println("47: ", err)
 		return
 	}
 
@@ -78,7 +78,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 						if el != "0" {
 							field, err := hexToBinary(el)
 							if err != nil {
-								fmt.Println("299: ", err)
+								fmt.Println("81: ", err)
 							}
 
 							portNumber += 4 - len(field)
@@ -111,7 +111,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 		result, err = g.Default.BulkWalkAll(oid)
 	}
 	if err != nil {
-		fmt.Println("230: ", err)
+		fmt.Println("114: ", err)
 		return
 	}
 
@@ -142,7 +142,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 						if el != "0" {
 							field, err := hexToBinary(el)
 							if err != nil {
-								fmt.Println("299: ", err)
+								fmt.Println("144: ", err)
 							}
 
 							portNumber += 4 - len(field)
@@ -168,7 +168,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 func getDGSPortsSpeed(portMap map[int]Port, oid string) {
 	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
-		fmt.Println("197: ", err)
+		fmt.Println("171: ", err)
 		return
 	}
 
@@ -177,7 +177,7 @@ func getDGSPortsSpeed(portMap map[int]Port, oid string) {
 
 		key, err := strconv.Atoi(oidParts[0])
 		if err != nil {
-			fmt.Println("238: ", err)
+			fmt.Println("180: ", err)
 			return
 		}
 
@@ -236,11 +236,13 @@ func handlerDGSChangePortDescription(c *gin.Context) {
 
 	oid := fmt.Sprintf("1.3.6.1.2.1.31.1.1.1.18.%d", port.Index)
 
+	fmt.Println(oid)
+
 	param := []g.SnmpPDU{{Name: oid, Value: port.Description, Type: g.OctetString}}
 
 	_, err = g.Default.Set(param)
 	if err != nil {
-		fmt.Println("133: ", err)
+		fmt.Println("245: ", err)
 		c.JSON(200, false)
 		c.Abort()
 		return
@@ -252,7 +254,7 @@ func handlerDGSChangePortDescription(c *gin.Context) {
 
 	_, err = g.Default.Set(param)
 	if err != nil {
-		fmt.Println("133: ", err)
+		fmt.Println("257: ", err)
 		c.JSON(200, false)
 		c.Abort()
 		return
