@@ -49,10 +49,14 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 	}
 
 	for _, variable := range result {
+
 		vlan := strings.Split(variable.Name, oid)[1][1:]
 
 		fieldsArr, ok := variable.Value.([]byte)
 		if ok {
+			fmt.Println(vlan)
+			fmt.Println(fieldsArr)
+
 			portNumber := 0
 
 			for _, item := range fieldsArr {
@@ -87,6 +91,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 								portNumber++
 
 								if char == '1' && portNumber <= _switch.PortAmount {
+									fmt.Println(portNumber)
 									port, _ := portMap[portNumber]
 									port.Vlan += vlan + ","
 									port.Mode = "trunk"
@@ -117,8 +122,10 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 
 	for _, variable := range result {
 		fieldsArr, ok := variable.Value.([]byte)
+
 		if ok {
 			portNumber := 0
+			fmt.Println(fieldsArr)
 
 			for _, item := range fieldsArr {
 				if item == 0 {
@@ -150,6 +157,7 @@ func getDGSPortsVlan(portMap map[int]Port, _switch SwitchOID, switchModel string
 								portNumber++
 
 								if char == '1' && portNumber <= _switch.PortAmount {
+									fmt.Println(portNumber)
 									port, _ := portMap[portNumber]
 									port.Mode = "access"
 									portMap[portNumber] = port

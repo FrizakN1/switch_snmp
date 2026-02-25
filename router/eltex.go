@@ -57,8 +57,8 @@ func getPortsMode(portMap map[int]Port) {
 	}
 }
 
-func getBatteryStatus() (string, string) {
-	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.2")
+func getBatteryStatus(oid, switchModel string) (string, string) {
+	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("80: ", err)
 		return "Неизвестно", "black"
@@ -69,33 +69,64 @@ func getBatteryStatus() (string, string) {
 	if len(result) > 0 {
 		status := result[0].Value.(int)
 
-		switch status {
-		case 1:
-			batteryStatus = "Батарея заряжена"
-			colorStatus = "green"
-			break
-		case 2:
-			batteryStatus = "Батарея разряжается"
-			colorStatus = "orange"
-			break
-		case 3:
-			batteryStatus = "Низкий уровень заряда батареи"
-			colorStatus = "red"
-			break
-		case 5:
-			batteryStatus = "Батарея отсутствует"
-			colorStatus = "black"
-			break
-		case 6:
-			batteryStatus = "Авария расцепителя тока питания батареи"
-			colorStatus = "red"
-			break
-		case 7:
-			batteryStatus = "Батарея заряжается"
-			colorStatus = "blue"
-			break
-		default:
-			batteryStatus = "Неизвестно"
+		if switchModel == "MES2428B" {
+			switch status {
+			case 1:
+				batteryStatus = "Батарея не поддерживается"
+				colorStatus = "red"
+				break
+			case 2:
+				batteryStatus = "Батарея не подключена"
+				colorStatus = "black"
+				break
+			case 3:
+				batteryStatus = "Батарея заряжается"
+				colorStatus = "blue"
+				break
+			case 4:
+				batteryStatus = "Низкий заряд батареи"
+				colorStatus = "red"
+				break
+			case 5:
+				batteryStatus = "Батарея разряжается"
+				colorStatus = "orange"
+				break
+			case 6:
+				batteryStatus = "Батарея подключена и заряжена"
+				colorStatus = "green"
+				break
+			default:
+				batteryStatus = "Неизвестно"
+			}
+		} else {
+			switch status {
+			case 1:
+				batteryStatus = "Батарея заряжена"
+				colorStatus = "green"
+				break
+			case 2:
+				batteryStatus = "Батарея разряжается"
+				colorStatus = "orange"
+				break
+			case 3:
+				batteryStatus = "Низкий уровень заряда батареи"
+				colorStatus = "red"
+				break
+			case 5:
+				batteryStatus = "Батарея отсутствует"
+				colorStatus = "black"
+				break
+			case 6:
+				batteryStatus = "Авария расцепителя тока питания батареи"
+				colorStatus = "red"
+				break
+			case 7:
+				batteryStatus = "Батарея заряжается"
+				colorStatus = "blue"
+				break
+			default:
+				batteryStatus = "Неизвестно"
+			}
 		}
 	} else {
 		batteryStatus = "Неизвестно"
@@ -105,8 +136,8 @@ func getBatteryStatus() (string, string) {
 	return batteryStatus, colorStatus
 }
 
-func getBatteryCharge() int {
-	result, err := g.Default.BulkWalkAll("1.3.6.1.4.1.35265.1.23.11.1.1.3")
+func getBatteryCharge(oid string) int {
+	result, err := g.Default.BulkWalkAll(oid)
 	if err != nil {
 		fmt.Println("133: ", err)
 		return 255
@@ -215,15 +246,36 @@ func handlerGetEltex(c *gin.Context) {
 	defer g.Default.Conn.Close()
 
 	portMap := make(map[int]Port)
-	_switch := switches["Eltex"]
 
-	for i := 1; i < 5; i++ {
-		oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-		err = getEltexPortsVlan(portMap, oid, i)
-		if err != nil {
-			c.HTML(200, "error", nil)
-			return
+	switchModel := getSwitchModel()
+
+	_switch, ok := switches[switchModel]
+	if !ok {
+		for key := range switches {
+			if strings.Contains(switchModel, key) {
+				_switch = switches[key]
+				switchModel = key
+			}
 		}
+	}
+
+	if switchModel == "MES2324FB" {
+		for i := 1; i < 5; i++ {
+			oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
+			err = getEltexPortsVlan(portMap, oid, i)
+			if err != nil {
+				c.HTML(200, "error", nil)
+				return
+			}
+		}
+	} else {
+		for i := 1; i <= _switch.PortAmount; i++ {
+			portMap[i] = Port{Index: i}
+		}
+
+		getDGSPortsVlan(portMap, _switch, switchModel)
+
+		formatVlans(portMap)
 	}
 
 	getPortsDescription(portMap, _switch, "")
@@ -236,13 +288,13 @@ func handlerGetEltex(c *gin.Context) {
 
 	systemName := getStringValue("1.3.6.1.2.1.1.5.0")
 
-	batteryStatus, colorStatus := getBatteryStatus()
+	batteryStatus, colorStatus := getBatteryStatus(_switch.BatteryStatus, switchModel)
 
-	firmware := getStringValue("1.3.6.1.4.1.89.2.16.1.1.4.1")
+	firmware := getStringValue(_switch.Firmware)
 
-	SN := getStringValue("1.3.6.1.4.1.89.53.14.1.5.1")
+	SN := getStringValue(_switch.SN)
 
-	batteryCharge := getBatteryCharge()
+	batteryCharge := getBatteryCharge(_switch.BatteryCharge)
 
 	uptime := getUptime()
 
