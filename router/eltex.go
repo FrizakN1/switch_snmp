@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-func getPortsMode(portMap map[int]Port) {
+func getPortsMode(portMap map[int]Port, oid, switchModel string) {
 	portModeOids := make([]string, 0)
 
 	for key, _ := range portMap {
-		oid := "1.3.6.1.4.1.89.48.22.1.1." + strconv.Itoa(key)
+		oid := oid + "." + strconv.Itoa(key)
 		portModeOids = append(portModeOids, oid)
 	}
 
@@ -35,21 +35,37 @@ func getPortsMode(portMap map[int]Port) {
 
 		intValue, ok := variable.Value.(int)
 		if ok {
-			switch intValue {
-			case 1:
-				port.Mode = "general"
-				break
-			case 2:
-				port.Mode = "access"
-				break
-			case 3:
-				port.Mode = "trunk"
-				break
-			case 7:
-				port.Mode = "customer"
-				break
-			default:
-				port.Mode = "unknown"
+			if switchModel == "MES2428B" {
+				switch intValue {
+				case 1:
+					port.Mode = "access"
+					break
+				case 2:
+					port.Mode = "trunk"
+					break
+				case 3:
+					port.Mode = "general"
+					break
+				default:
+					port.Mode = "unknown"
+				}
+			} else {
+				switch intValue {
+				case 1:
+					port.Mode = "general"
+					break
+				case 2:
+					port.Mode = "access"
+					break
+				case 3:
+					port.Mode = "trunk"
+					break
+				case 7:
+					port.Mode = "customer"
+					break
+				default:
+					port.Mode = "unknown"
+				}
 			}
 		}
 
@@ -282,7 +298,7 @@ func handlerGetEltex(c *gin.Context) {
 
 	getPortsSpeed(portMap)
 
-	getPortsMode(portMap)
+	getPortsMode(portMap, _switch.PortMode, switchModel)
 
 	getMacAddresses(portMap, "")
 

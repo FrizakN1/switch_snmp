@@ -44,6 +44,7 @@ type SwitchOID struct {
 	Speed         string
 	BatteryCharge string
 	BatteryStatus string
+	PortMode      string
 }
 
 var aliases Aliases
@@ -188,6 +189,7 @@ var switches = map[string]SwitchOID{
 		PortDesc:      "1.3.6.1.2.1.31.1.1.1.18",
 		BatteryCharge: "1.3.6.1.4.1.35265.1.23.11.1.1.3",
 		BatteryStatus: "1.3.6.1.4.1.35265.1.23.11.1.1.2",
+		PortMode:      "1.3.6.1.4.1.89.48.22.1.1",
 	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:      "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
@@ -200,6 +202,7 @@ var switches = map[string]SwitchOID{
 		VlanUntagged:  "1.3.6.1.2.1.17.7.1.4.3.1.4",
 		BatteryCharge: "1.3.6.1.4.1.35265.1.139.12.1.3.1.1.3",
 		BatteryStatus: "1.3.6.1.4.1.35265.1.139.12.1.3.1.1.2",
+		PortMode:      "1.3.6.1.4.1.2076.65.1.10.1.2",
 	},
 	//snmpset -v2c -c <community> <IP address> \
 	//1.3.6.1.4.1.89.87.2.1.3.1 i {local(1)} \
