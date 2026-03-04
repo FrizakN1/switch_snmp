@@ -215,6 +215,7 @@ var switches = map[string]SwitchOID{
 		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.35265.1.139.6.1.1.2.1.0",
 		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.35265.1.139.6.1.1.2.2.0",
 		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.35265.1.139.6.1.1.2.3.0",
+		CPUTemperature:            "1.3.6.1.4.1.2076.81.1.66.0",
 	},
 	//snmpset -v2c -c <community> <IP address> \
 	//1.3.6.1.4.1.89.87.2.1.3.1 i {local(1)} \
