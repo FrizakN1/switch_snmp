@@ -37,7 +37,13 @@ function handlerGetTransceiverInfo(key) {
     fetch(`/snmp/eltex/${ip}/transceiver-info`, options)
         .then(response => response.json())
         .then(data => {
-            console.log(data)
+            let transceiverColumn = document.querySelector(`#transceiver_min-${key}`)
+
+            if (data.TransceiverTransmission === "#Ошибка" || data.TransceiverReception === "#Ошибка") {
+                transceiverColumn.innerHTML = "ddm модуль не обнаружен"
+            } else {
+                transceiverColumn.innerHTML = `tx: ${data.TransceiverTransmission} rx: ${data.TransceiverReception}`
+            }
         })
         .catch(error => console.error(error))
 }

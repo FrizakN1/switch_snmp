@@ -16,6 +16,7 @@
     <table>
         <thead>
             <tr>
+                {{if eq .Type "Eltex MES"}}<th></th>{{end}}
                 <th>№</th>
                 <th>Speed</th>
                 <th>Mode</th>
@@ -27,7 +28,7 @@
         <tbody>
         {{range $key, $value := .Ports}}
             <tr>
-                {{if eq $.Type "Eltex MES"}}<td class="col0" onclick="handlerGetTransceiverInfo({{$key}})">tr</td>{{end}}
+                {{if eq $.Type "Eltex MES"}}<td class="col0" id="transceiver_min-{{$key}}" onclick="handlerGetTransceiverInfo({{$key}})">i</td>{{end}}
                 <td class="col1">{{$value.Index}}</td>
                 <td {{if gt $value.Speed 0}} class="green col2" {{ else }} class="grey col2" {{end}}>{{$value.Speed}}</td>
                 <td class="col3">{{$value.Mode}}</td>
