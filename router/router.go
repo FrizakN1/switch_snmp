@@ -344,7 +344,7 @@ func getIntValue(oid string) string {
 	}
 
 	if result.Variables[0].Value != nil {
-		intValue := result.Variables[0].Value.(uint)
+		intValue := result.Variables[0].Value.(int)
 		return fmt.Sprintf("%d", intValue)
 	}
 
