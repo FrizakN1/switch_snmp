@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -275,9 +276,21 @@ func handlerGetPortTransceiverInfo(c *gin.Context) {
 	transceiverTransmission := getIntValue(fmt.Sprintf("%s.%d.8", _switch.TransceiverInfo, portKey))
 	transceiverReception := getIntValue(fmt.Sprintf("%s.%d.9", _switch.TransceiverInfo, portKey))
 
+	intTransceiverTransmission, err := strconv.Atoi(transceiverTransmission)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	intTransceiverReception, err := strconv.Atoi(transceiverReception)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"TransceiverTransmission": transceiverTransmission,
-		"TransceiverReception":    transceiverReception,
+		"TransceiverTransmission": math.Round(float64(intTransceiverTransmission)/1000*100) / 100,
+		"TransceiverReception":    math.Round(float64(intTransceiverReception)/1000*100) / 100,
 	})
 }
 
