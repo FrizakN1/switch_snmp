@@ -248,6 +248,23 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
 	return nil
 }
 
+func handlerGetPortTransceiverInfo(c *gin.Context) {
+	ip := c.Param("ip")
+
+	g.Default.Target = ip
+	g.Default.Community = config.EltexReadOnlyCommunity
+
+	fmt.Printf("start snmp eltex transceiver info %s \n", ip)
+
+	err := g.Default.Connect()
+	if err != nil {
+		fmt.Println("44: ", err)
+		return
+	}
+	defer g.Default.Conn.Close()
+
+}
+
 func handlerGetEltex(c *gin.Context) {
 	ip := c.Param("ip")
 	g.Default.Target = ip
