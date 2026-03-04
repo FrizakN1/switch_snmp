@@ -42,7 +42,7 @@ function handlerGetTransceiverInfo(key) {
             if (data.TransceiverTransmission === "#Ошибка" || data.TransceiverReception === "#Ошибка") {
                 transceiverColumn.innerHTML = "ddm модуль не обнаружен"
             } else {
-                transceiverColumn.innerHTML = `tx: ${data.TransceiverTransmission} rx: ${data.TransceiverReception}`
+                transceiverColumn.innerHTML = `<span>tx: ${data.TransceiverTransmission}</span> <span>rx: ${data.TransceiverReception}</span>`
             }
         })
         .catch(error => console.error(error))

@@ -125,3 +125,7 @@ h3 span {
     display: inline-block;
     width: 20%;
 }
+
+.col0 span{
+    white-space: nowrap;
+}
