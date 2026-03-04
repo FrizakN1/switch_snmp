@@ -2,10 +2,11 @@ package router
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	g "github.com/gosnmp/gosnmp"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	g "github.com/gosnmp/gosnmp"
 )
 
 func getPortsMode(portMap map[int]Port, oid, switchModel string) {
@@ -302,7 +303,7 @@ func handlerGetEltex(c *gin.Context) {
 
 	getMacAddresses(portMap, "")
 
-	systemName := getStringValue("1.3.6.1.2.1.1.5.0")
+	systemName := getStringValue(_switch.SystemName)
 
 	batteryStatus, colorStatus := getBatteryStatus(_switch.BatteryStatus, switchModel)
 
@@ -310,21 +311,28 @@ func handlerGetEltex(c *gin.Context) {
 
 	SN := getStringValue(_switch.SN)
 
+	cpuFiveSec := getStringValue(_switch.CPUUtilizationFiveSeconds)
+	cpuOneMin := getStringValue(_switch.CPUUtilizationOneMinutes)
+	cpuFiveMin := getStringValue(_switch.CPUUtilizationFiveMinutes)
+
 	batteryCharge := getBatteryCharge(_switch.BatteryCharge)
 
 	uptime := getUptime()
 
 	c.HTML(200, "index", gin.H{
-		"Ports":         portMap,
-		"SystemName":    systemName,
-		"SN":            SN,
-		"IP":            ip,
-		"BatteryStatus": batteryStatus,
-		"ColorStatus":   colorStatus,
-		"Firmware":      firmware,
-		"BatteryCharge": batteryCharge,
-		"Uptime":        uptime,
-		"Type":          "Eltex MES",
-		"CanChange":     false,
+		"Ports":                     portMap,
+		"SystemName":                systemName,
+		"SN":                        SN,
+		"IP":                        ip,
+		"BatteryStatus":             batteryStatus,
+		"ColorStatus":               colorStatus,
+		"Firmware":                  firmware,
+		"BatteryCharge":             batteryCharge,
+		"Uptime":                    uptime,
+		"Type":                      "Eltex MES",
+		"CanChange":                 false,
+		"CPUUtilizationFiveSeconds": cpuFiveSec,
+		"CPUUtilizationOneSeconds":  cpuOneMin,
+		"CPUUtilizationFiveMinutes": cpuFiveMin,
 	})
 }

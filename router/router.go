@@ -3,13 +3,14 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	g "github.com/gosnmp/gosnmp"
 	"snmp/settings"
 	"snmp/utils"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	g "github.com/gosnmp/gosnmp"
 )
 
 type Port struct {
@@ -32,19 +33,22 @@ type Mac struct {
 }
 
 type SwitchOID struct {
-	Firmware      string
-	SystemName    string
-	SN            string
-	Uptime        string
-	SaveConfig    string
-	PortDesc      string
-	PortAmount    int
-	Vlan          string
-	VlanUntagged  string
-	Speed         string
-	BatteryCharge string
-	BatteryStatus string
-	PortMode      string
+	Firmware                  string
+	SystemName                string
+	SN                        string
+	Uptime                    string
+	SaveConfig                string
+	PortDesc                  string
+	PortAmount                int
+	Vlan                      string
+	VlanUntagged              string
+	Speed                     string
+	BatteryCharge             string
+	BatteryStatus             string
+	PortMode                  string
+	CPUUtilizationFiveSeconds string
+	CPUUtilizationOneMinutes  string
+	CPUUtilizationFiveMinutes string
 }
 
 var aliases Aliases
@@ -182,14 +186,17 @@ var switches = map[string]SwitchOID{
 	},
 
 	"MES2324FB": { //https://eltexcm.ru/assets/docs/site/MES_configuration_and_monitoring_via_SNMP_4_0_16_5.pdf
-		Firmware:      "1.3.6.1.4.1.89.2.16.1.1.4.1",
-		SystemName:    "1.3.6.1.2.1.1.5.0",
-		SN:            "1.3.6.1.4.1.89.53.14.1.5.1",
-		SaveConfig:    "1.3.6.1.4.1.89.87.2.1",
-		PortDesc:      "1.3.6.1.2.1.31.1.1.1.18",
-		BatteryCharge: "1.3.6.1.4.1.35265.1.23.11.1.1.3",
-		BatteryStatus: "1.3.6.1.4.1.35265.1.23.11.1.1.2",
-		PortMode:      "1.3.6.1.4.1.89.48.22.1.1",
+		Firmware:                  "1.3.6.1.4.1.89.2.16.1.1.4.1",
+		SystemName:                "1.3.6.1.2.1.1.5.0",
+		SN:                        "1.3.6.1.4.1.89.53.14.1.5.1",
+		SaveConfig:                "1.3.6.1.4.1.89.87.2.1",
+		PortDesc:                  "1.3.6.1.2.1.31.1.1.1.18",
+		BatteryCharge:             "1.3.6.1.4.1.35265.1.23.11.1.1.3",
+		BatteryStatus:             "1.3.6.1.4.1.35265.1.23.11.1.1.2",
+		PortMode:                  "1.3.6.1.4.1.89.48.22.1.1",
+		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.89.1.7",
+		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.89.1.8",
+		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.89.1.9",
 	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:      "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
