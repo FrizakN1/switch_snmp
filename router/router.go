@@ -343,8 +343,8 @@ func getIntValue(oid string) string {
 		return "#Ошибка"
 	}
 
-	intValue, ok := result.Variables[0].Value.(uint)
-	if ok {
+	if result.Variables[0].Value != nil {
+		intValue := result.Variables[0].Value.(uint)
 		return fmt.Sprintf("%d", intValue)
 	}
 
