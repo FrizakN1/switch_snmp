@@ -11,7 +11,7 @@
     <h3>IP: {{.IP}} | Версия ПО: {{.Firmware}} | S/N: {{.SN}} {{if eq .Type "Eltex MES"}}| Состояние АКБ: <span class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</span>
         {{if ne .BatteryCharge 255}}| Заряд АКБ:  {{.BatteryCharge}} {{end}}{{end}}| Время работы: {{.Uptime}}</h3>
     {{if eq .Type "Eltex MES"}}
-    <h3>CPU Utilization: 5 sec: {{.CPUUtilizationFiveSeconds}}% | 1 min: {{.CPUUtilizationOneSeconds}}% | 5 min: {{.CPUUtilizationFiveMinutes}}%</h3>
+    <h3>Температура CPU: {{.CPUTemperature}}°C | CPU Utilization: 5 sec: {{.CPUUtilizationFiveSeconds}}% | 1 min: {{.CPUUtilizationOneSeconds}}% | 5 min: {{.CPUUtilizationFiveMinutes}}%</h3>
     {{end}}
     <table>
         <thead>

@@ -49,6 +49,7 @@ type SwitchOID struct {
 	CPUUtilizationFiveSeconds string
 	CPUUtilizationOneMinutes  string
 	CPUUtilizationFiveMinutes string
+	CPUTemperature            string
 }
 
 var aliases Aliases
@@ -197,6 +198,7 @@ var switches = map[string]SwitchOID{
 		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.89.1.7.0",
 		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.89.1.8.0",
 		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.89.1.9.0",
+		CPUTemperature:            "1.3.6.1.4.1.89.53.15.1.10.1",
 	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:      "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
