@@ -311,9 +311,9 @@ func handlerGetEltex(c *gin.Context) {
 
 	SN := getStringValue(_switch.SN)
 
-	cpuFiveSec := getStringValue(_switch.CPUUtilizationFiveSeconds)
-	cpuOneMin := getStringValue(_switch.CPUUtilizationOneMinutes)
-	cpuFiveMin := getStringValue(_switch.CPUUtilizationFiveMinutes)
+	cpuFiveSec := getIntValue(_switch.CPUUtilizationFiveSeconds)
+	cpuOneMin := getIntValue(_switch.CPUUtilizationOneMinutes)
+	cpuFiveMin := getIntValue(_switch.CPUUtilizationFiveMinutes)
 
 	batteryCharge := getBatteryCharge(_switch.BatteryCharge)
 

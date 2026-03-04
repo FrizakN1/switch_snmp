@@ -196,7 +196,7 @@ var switches = map[string]SwitchOID{
 		PortMode:                  "1.3.6.1.4.1.89.48.22.1.1",
 		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.89.1.7.0",
 		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.89.1.8.0",
-		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.89.1.9.0",
+		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.89.1.9",
 	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:      "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
@@ -336,6 +336,20 @@ func getUptime() string {
 	return "Неизвестно"
 }
 
+func getIntValue(oid string) string {
+	result, err := g.Default.Get([]string{oid})
+	if err != nil {
+		fmt.Println("133: ", err)
+		return "#Ошибка"
+	}
+
+	intValue, ok := result.Variables[0].Value.(uint)
+	if ok {
+		return fmt.Sprintf("%d", intValue)
+	}
+
+	return "#Ошибка"
+}
 func getStringValue(oid string) string {
 	result, err := g.Default.Get([]string{oid})
 	if err != nil {
