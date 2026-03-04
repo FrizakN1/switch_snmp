@@ -26,6 +26,22 @@ function handlerTransformColumn(el) {
     col.append(btn)
 }
 
+function handlerGetTransceiverInfo(key) {
+    let ip = window.location.href.split("snmp/eltex/")[1]
+
+    let options = {
+        method: "POST",
+        body: JSON.stringify(key)
+    }
+
+    fetch(`/snmp/eltex/${ip}/transceiver-info`, options)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+        })
+        .catch(error => console.error(error))
+}
+
 function handlerSendChange(key) {
     let value = document.querySelector(`#input-${key}`).value
     let switchModel = document.querySelector("h1").innerHTML.match(/\(([^)]+)\)/)[1]

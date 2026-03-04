@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -250,6 +251,12 @@ func getEltexPortsVlan(portMap map[int]Port, oid string, step int) error {
 
 func handlerGetPortTransceiverInfo(c *gin.Context) {
 	ip := c.Param("ip")
+	var portKey int
+
+	if err := c.BindJSON(&portKey); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	g.Default.Target = ip
 	g.Default.Community = config.EltexReadOnlyCommunity
@@ -263,6 +270,15 @@ func handlerGetPortTransceiverInfo(c *gin.Context) {
 	}
 	defer g.Default.Conn.Close()
 
+	_switch, _ := switches["MES2324FB"]
+
+	transceiverTransmission := getIntValue(fmt.Sprintf("%s.%d.8", _switch.TransceiverInfo, portKey))
+	transceiverReception := getIntValue(fmt.Sprintf("%s.%d.9", _switch.TransceiverInfo, portKey))
+
+	c.JSON(http.StatusOK, gin.H{
+		"TransceiverTransmission": transceiverTransmission,
+		"TransceiverReception":    transceiverReception,
+	})
 }
 
 func handlerGetEltex(c *gin.Context) {

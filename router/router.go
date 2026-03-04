@@ -50,6 +50,7 @@ type SwitchOID struct {
 	CPUUtilizationOneMinutes  string
 	CPUUtilizationFiveMinutes string
 	CPUTemperature            string
+	TransceiverInfo           string
 }
 
 var aliases Aliases
@@ -199,6 +200,7 @@ var switches = map[string]SwitchOID{
 		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.89.1.8.0",
 		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.89.1.9.0",
 		CPUTemperature:            "1.3.6.1.4.1.89.53.15.1.10.1",
+		TransceiverInfo:           "1.3.6.1.4.1.89.90.1.2.1.3",
 	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:                  "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
@@ -253,6 +255,7 @@ func Initialization(_config *settings.Setting) *gin.Engine {
 	routerSNMP.Static("assets/", "assets/")
 
 	routerSNMP.GET("/eltex/:ip", handlerGetEltex)
+	routerSNMP.POST("/eltex/:ip/transceiver-info", handlerGetPortTransceiverInfo)
 	routerSNMP.GET("/dlink/:ip", handlerGetDGS)
 	routerSNMP.POST("/dlink/change_port_description/:ip", handlerDGSChangePortDescription)
 
