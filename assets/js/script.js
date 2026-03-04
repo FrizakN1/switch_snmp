@@ -39,11 +39,11 @@ function handlerGetTransceiverInfo(key) {
         .then(data => {
             let transceiverColumn = document.querySelector(`#transceiver_min-${key}`)
 
-            if (data.TransceiverTransmission === "#Ошибка" || data.TransceiverReception === "#Ошибка") {
-                transceiverColumn.innerHTML = "ddm модуль не обнаружен"
-            } else {
-                transceiverColumn.innerHTML = `<span>tx: ${data.TransceiverTransmission}</span> <span>rx: ${data.TransceiverReception}</span>`
-            }
+            transceiverColumn.innerHTML = `<span>tx: ${data.TransceiverTransmission}</span> <span>rx: ${data.TransceiverReception}</span>`
+
+            transceiverColumn.addEventListener("click", function () {
+                transceiverColumn.innerHTML = `<img src="/snmp/assets/public/ddm.jpg" width="50">`
+            })
         })
         .catch(error => console.error(error))
 }

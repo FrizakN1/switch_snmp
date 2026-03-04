@@ -276,6 +276,15 @@ func handlerGetPortTransceiverInfo(c *gin.Context) {
 	transceiverTransmission := getIntValue(fmt.Sprintf("%s.%d.8", _switch.TransceiverInfo, portKey))
 	transceiverReception := getIntValue(fmt.Sprintf("%s.%d.9", _switch.TransceiverInfo, portKey))
 
+	if transceiverTransmission == "#Ошибка" || transceiverReception == "#Ошибка" {
+		c.JSON(http.StatusOK, gin.H{
+			"TransceiverTransmission": "-",
+			"TransceiverReception":    "-",
+		})
+
+		return
+	}
+
 	intTransceiverTransmission, err := strconv.Atoi(transceiverTransmission)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
