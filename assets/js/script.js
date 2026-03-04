@@ -40,10 +40,6 @@ function handlerGetTransceiverInfo(key) {
             let transceiverColumn = document.querySelector(`#transceiver_min-${key}`)
 
             transceiverColumn.innerHTML = `<span>tx: ${data.TransceiverTransmission}</span> <span>rx: ${data.TransceiverReception}</span>`
-
-            transceiverColumn.addEventListener("click", function () {
-                transceiverColumn.innerHTML = `<img src="/snmp/assets/public/ddm.jpg" width="50">`
-            })
         })
         .catch(error => console.error(error))
 }
