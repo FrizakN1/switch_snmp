@@ -92,6 +92,11 @@ h3 span {
     cursor: pointer;
 }
 
+.col0 {
+    padding: unset !important;
+    text-align: center;
+}
+
 .col1 {
     width: 4%;
 }.col2 {
