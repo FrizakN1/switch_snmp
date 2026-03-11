@@ -311,7 +311,7 @@ func getBandwidthControl(portMap map[int]Port, oidTX, oidRX string) {
 		bandwidthRX := variable.Value.(int)
 
 		port, _ := portMap[key]
-		port.BandwidthRX = "-"
+		port.BandwidthRX = "NoLimit"
 		if bandwidthRX != 0 {
 			port.BandwidthRX = fmt.Sprint(bandwidthRX)
 		}
