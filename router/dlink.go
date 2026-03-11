@@ -2,10 +2,11 @@ package router
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	g "github.com/gosnmp/gosnmp"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	g "github.com/gosnmp/gosnmp"
 )
 
 func formatVlans(portMap map[int]Port) {
@@ -265,6 +266,60 @@ func handlerDGSChangePortDescription(c *gin.Context) {
 	c.JSON(200, true)
 }
 
+func getBandwidthControl(portMap map[int]Port, oidTX, oidRX string) {
+	result, err := g.Default.BulkWalkAll(oidTX)
+	if err != nil {
+		fmt.Println("171: ", err)
+		return
+	}
+
+	for _, variable := range result {
+		oidParts := strings.Split(variable.Name[len(oidTX)+2:], ".")
+
+		key, err := strconv.Atoi(oidParts[0])
+		if err != nil {
+			fmt.Println("180: ", err)
+			return
+		}
+
+		bandwidthTX := variable.Value.(int)
+
+		port, _ := portMap[key]
+		port.BandwidthTX = "-"
+		if bandwidthTX != 0 {
+			port.BandwidthTX = fmt.Sprint(bandwidthTX)
+		}
+
+		portMap[key] = port
+	}
+
+	result, err = g.Default.BulkWalkAll(oidRX)
+	if err != nil {
+		fmt.Println("171: ", err)
+		return
+	}
+
+	for _, variable := range result {
+		oidParts := strings.Split(variable.Name[len(oidRX)+2:], ".")
+
+		key, err := strconv.Atoi(oidParts[0])
+		if err != nil {
+			fmt.Println("180: ", err)
+			return
+		}
+
+		bandwidthRX := variable.Value.(int)
+
+		port, _ := portMap[key]
+		port.BandwidthRX = "-"
+		if bandwidthRX != 0 {
+			port.BandwidthRX = fmt.Sprint(bandwidthRX)
+		}
+
+		portMap[key] = port
+	}
+}
+
 func getSwitchModel() string {
 	result, err := g.Default.Get([]string{"1.3.6.1.2.1.1.1.0"})
 	if err != nil {
@@ -345,6 +400,10 @@ func handlerGetDGS(c *gin.Context) {
 	}
 
 	uptime := getUptime()
+
+	if _switch.BandwidthTX != "" {
+		getBandwidthControl(portMap, _switch.BandwidthTX, _switch.BandwidthRX)
+	}
 
 	c.HTML(200, "index", gin.H{
 		"Ports":      portMap,

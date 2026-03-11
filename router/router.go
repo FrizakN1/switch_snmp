@@ -21,6 +21,8 @@ type Port struct {
 	Speed       int
 	Macs        []string
 	SwitchModel string
+	BandwidthRX string
+	BandwidthTX string
 }
 
 type Aliases struct {
@@ -51,6 +53,8 @@ type SwitchOID struct {
 	CPUUtilizationFiveMinutes string
 	CPUTemperature            string
 	TransceiverInfo           string
+	BandwidthRX               string
+	BandwidthTX               string
 }
 
 var aliases Aliases
@@ -98,6 +102,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.134.1.1.7.6.1.2",
 		VlanUntagged: "1.3.6.1.4.1.171.10.134.1.1.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.10.134.1.1.1.13.1.4",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.134.1.1.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.134.1.1.13.1.2.1.3",
 	},
 	"DGS-1100-10/ME": {
 		Firmware:     "1.3.6.1.4.1.171.10.134.2.1.1.1.3.0",
@@ -109,6 +115,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.134.2.1.7.6.1.3",
 		VlanUntagged: "1.3.6.1.4.1.171.10.134.2.1.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.10.134.2.1.1.100.1.1.4",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.134.2.1.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.134.2.1.13.1.2.1.4",
 	},
 	"DGS-1210-10/C1": {
 		Firmware:     "1.3.6.1.4.1.171.10.76.32.1.1.3.0",
@@ -120,6 +128,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.76.32.1.7.6.1.2",
 		VlanUntagged: "1.3.6.1.4.1.171.10.76.32.1.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.10.76.32.1.1.13.1.3",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.76.32.1.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.76.32.1.13.1.2.1.3",
 	},
 	"DGS-1100-26/ME": {
 		Firmware:   "1.3.6.1.4.1.171.15.3.1.4.0",
@@ -143,6 +153,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.76.19.1.7.6.1.2",
 		VlanUntagged: "1.3.6.1.4.1.171.10.76.19.1.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.10.76.19.1.1.13.1.3",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.76.19.1.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.76.19.1.13.1.2.1.3",
 	},
 	"DGS-1210-20/F1": {
 		Firmware:     "1.3.6.1.4.1.171.11.153.1000.1.3.0",
@@ -154,6 +166,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.11.153.1000.7.6.1.2",
 		VlanUntagged: "1.3.6.1.4.1.171.11.153.1000.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.11.153.1000.1.13.1.3",
+		BandwidthTX:  "1.3.6.1.4.1.171.11.153.1000.13.1.2.1.2.1",
+		BandwidthRX:  "1.3.6.1.4.1.171.11.153.1000.13.1.2.1.3.1",
 	},
 	"DGS-1210-20/ME/A1": {
 		Firmware:     "1.3.6.1.4.1.171.10.76.31.1.1.3.0",
@@ -165,6 +179,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.76.31.1.7.6.1.3",
 		VlanUntagged: "1.3.6.1.4.1.171.10.76.31.1.7.6.1.5",
 		Speed:        "1.3.6.1.4.1.171.10.76.31.1.1.13.1.4",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.76.31.1.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.76.31.1.13.1.2.1.3",
 	},
 	"DGS-1210-28": {
 		Firmware:     "1.3.6.1.4.1.171.10.76.15.1.3.0",
@@ -175,6 +191,8 @@ var switches = map[string]SwitchOID{
 		Vlan:         "1.3.6.1.4.1.171.10.76.15.7.6.1.2",
 		VlanUntagged: "1.3.6.1.4.1.171.10.76.15.7.6.1.4",
 		Speed:        "1.3.6.1.4.1.171.10.76.15.1.13.1.3",
+		BandwidthTX:  "1.3.6.1.4.1.171.10.76.15.13.1.2.1.2",
+		BandwidthRX:  "1.3.6.1.4.1.171.10.76.15.13.1.2.1.3",
 	},
 
 	"DGS-3120-24SC": {

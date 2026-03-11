@@ -21,6 +21,7 @@
                 <th>Speed</th>
                 <th>Mode</th>
                 <th>Vlan</th>
+                <th>Bandwidth</th>
                 <th>Description</th>
                 <th>Mac</th>
             </tr>
@@ -33,6 +34,7 @@
                 <td {{if gt $value.Speed 0}} class="green col2" {{ else }} class="grey col2" {{end}}>{{$value.Speed}}</td>
                 <td class="col3">{{$value.Mode}}</td>
                 <td class="col4">{{$value.Vlan}}</td>
+                <td>TX:{{$value.BandwidthTX}} RX:{{$value.BandwidthRX}}</td>
                 <td class="col5" id="description-{{$key}}">{{$value.Description}} {{if $.CanChange}} <img onclick="handlerTransformColumn(this)" src="/snmp/assets/public/pen.svg" alt="O">{{end}}</td>
                 <td class="mac-count col6" id="mac_min-{{$key}}" onclick="handlerChangeShownColumn(this)">
                     <span class="amount">{{len $value.Macs}} </span> <img src="/snmp/assets/public/open.svg" alt="O">
