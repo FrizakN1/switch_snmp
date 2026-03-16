@@ -149,6 +149,9 @@ func (s *DlinkService) ChangeBandwidth(ip string, req ChangeBandwidthRequest) er
 	if !ok || sw.BandwidthTX == "" || sw.BandwidthRX == "" {
 		return fmt.Errorf("bandwidth control not supported for this model")
 	}
+	if sw.SaveConfig == "" {
+		return fmt.Errorf("save config not supported for this model")
+	}
 
 	snmp := snmpx.NewClient(ip, s.cfg.ReadWriteCommunity)
 	if err := snmp.Connect(); err != nil {
@@ -175,6 +178,12 @@ func (s *DlinkService) ChangeBandwidth(ip string, req ChangeBandwidthRequest) er
 		return err
 	}
 	if err := trySetInt(sw.BandwidthRX, req.Index, req.BandwidthRX); err != nil {
+		return err
+	}
+
+	// Persist config change on the switch (same approach as description updates).
+	param := []g.SnmpPDU{{Name: sw.SaveConfig, Value: 1, Type: g.Integer}}
+	if _, err := snmp.Set(param); err != nil {
 		return err
 	}
 
