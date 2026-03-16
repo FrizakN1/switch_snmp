@@ -30,6 +30,24 @@ func (s *Server) handleGetDlink(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", data)
 }
 
+func (s *Server) handleGetDlinkMacs(c *gin.Context) {
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in GET dlink macs ip=%q", ip)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid ip"})
+		return
+	}
+
+	ports, err := s.dlink.GetMacs(ip)
+	if err != nil {
+		log.Printf("dlink.GetMacs failed ip=%q err=%v", ip, err)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "snmp failed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true, "ports": ports})
+}
+
 func (s *Server) handleGetEltex(c *gin.Context) {
 	ip := c.Param("ip")
 	if net.ParseIP(ip) == nil {
@@ -46,6 +64,24 @@ func (s *Server) handleGetEltex(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "index", data)
+}
+
+func (s *Server) handleGetEltexMacs(c *gin.Context) {
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in GET eltex macs ip=%q", ip)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid ip"})
+		return
+	}
+
+	ports, err := s.eltex.GetMacs(ip)
+	if err != nil {
+		log.Printf("eltex.GetMacs failed ip=%q err=%v", ip, err)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "snmp failed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true, "ports": ports})
 }
 
 func (s *Server) handleGetEltexTransceiverInfo(c *gin.Context) {

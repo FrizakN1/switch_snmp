@@ -4,6 +4,8 @@ const handlerChangeShownColumn = (el) => {
     let minColumn = document.querySelector("#mac_min-" + key)
     let maxColumn = document.querySelector("#mac_max-" + key)
 
+    if (!minColumn || !maxColumn) return
+
     if (minColumn.style.display === "none") {
         minColumn.style.display = "table-cell"
         maxColumn.style.display = "none"
@@ -71,6 +73,7 @@ function handlerGetTransceiverInfo(key) {
         .then(response => response.json())
         .then(data => {
             let transceiverColumn = document.querySelector(`#transceiver_min-${key}`)
+            if (!transceiverColumn) return
             transceiverColumn.innerHTML = `<span>tx: ${data.TransceiverTransmission}</span> <span>rx: ${data.TransceiverReception}</span>`
         })
         .catch(error => console.error(error))
@@ -149,3 +152,72 @@ function handlerSendBandwidthChange(key) {
         .catch(error => console.error(error))
 }
 
+function loadMacs() {
+    let ip
+    let url
+
+    if (window.location.href.includes("/snmp/dlink/")) {
+        ip = window.location.href.split("snmp/dlink/")[1]
+        url = `/snmp/dlink/${ip}/macs`
+    } else if (window.location.href.includes("/snmp/eltex/")) {
+        ip = window.location.href.split("snmp/eltex/")[1]
+        url = `/snmp/eltex/${ip}/macs`
+    } else {
+        return
+    }
+
+    // Initialize all rows to 0 while loading.
+    document.querySelectorAll("td[id^='mac_min-']").forEach(td => {
+        td.classList.add("loading")
+    })
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (!data || !data.ok || !data.ports) {
+                throw new Error("bad response")
+            }
+
+            // Fill defaults for all visible rows.
+            document.querySelectorAll("td[id^='mac_min-']").forEach(td => {
+                const key = td.id.split("-")[1]
+                const maxTd = document.querySelector(`#mac_max-${key}`)
+                td.classList.remove("loading")
+                td.onclick = () => handlerChangeShownColumn(td)
+                td.innerHTML = `<span class="amount">0</span> <img src="/snmp/assets/public/open.svg" alt="O">`
+                if (maxTd) {
+                    maxTd.onclick = () => handlerChangeShownColumn(maxTd)
+                    maxTd.innerHTML = ``
+                }
+            })
+
+            // Apply actual macs from server.
+            Object.keys(data.ports).forEach(k => {
+                const key = String(k)
+                const macs = data.ports[key] || []
+
+                const minTd = document.querySelector(`#mac_min-${key}`)
+                const maxTd = document.querySelector(`#mac_max-${key}`)
+
+                if (minTd) {
+                    minTd.classList.remove("loading")
+                    minTd.onclick = () => handlerChangeShownColumn(minTd)
+                    minTd.innerHTML = `<span class="amount">${macs.length}</span> <img src="/snmp/assets/public/open.svg" alt="O">`
+                }
+
+                if (maxTd) {
+                    maxTd.onclick = () => handlerChangeShownColumn(maxTd)
+                    maxTd.innerHTML = macs.map(m => `<div>${m}</div>`).join("")
+                }
+            })
+        })
+        .catch(err => {
+            console.error(err)
+            document.querySelectorAll("td[id^='mac_min-']").forEach(td => {
+                td.classList.remove("loading")
+                td.innerHTML = `!`
+            })
+        })
+}
+
+window.addEventListener("DOMContentLoaded", loadMacs)

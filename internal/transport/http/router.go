@@ -26,7 +26,9 @@ func (s *Server) Router() *gin.Engine {
 
 	routerSNMP.GET("/eltex/:ip", s.handleGetEltex)
 	routerSNMP.POST("/eltex/:ip/transceiver-info", s.handleGetEltexTransceiverInfo)
+	routerSNMP.GET("/eltex/:ip/macs", s.handleGetEltexMacs)
 	routerSNMP.GET("/dlink/:ip", s.handleGetDlink)
+	routerSNMP.GET("/dlink/:ip/macs", s.handleGetDlinkMacs)
 	routerSNMP.POST("/dlink/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_bandwidth/:ip", s.handleChangeBandwidth)
 

@@ -92,6 +92,15 @@ h3 span {
     cursor: pointer;
 }
 
+.mac-count.loading {
+    cursor: default;
+}
+
+.spinner {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .col0 {
     padding: unset !important;
     text-align: center;

@@ -70,7 +70,6 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 	_ = snmpx.GetPortsDescription(snmp, portMap, sw, "")
 	_ = snmpx.GetPortsSpeed(snmp, portMap)
 	_ = getPortsMode(snmp, portMap, sw.PortMode, switchModel)
-	_ = snmpx.GetMacAddresses(snmp, s.aliases, portMap, "")
 
 	systemName, _ := snmpx.GetStringValue(snmp, "1.3.6.1.2.1.1.5.0")
 	batteryStatus, colorStatus, _ := getBatteryStatus(snmp, sw.BatteryStatus, switchModel)
@@ -141,6 +140,27 @@ func (s *EltexService) GetTransceiverInfo(ip string, portKey int) (*TransceiverI
 	rx := math.Round(float64(intRX)/1000*100) / 100
 
 	return &TransceiverInfo{TransceiverTransmission: tx, TransceiverReception: rx}, nil
+}
+
+func (s *EltexService) GetMacs(ip string) (map[int][]string, error) {
+	snmp := snmpx.NewClient(ip, s.cfg.EltexReadOnlyCommunity)
+	if err := snmp.Connect(); err != nil {
+		return nil, err
+	}
+	defer snmp.Conn.Close()
+
+	// For Eltex we always used BulkWalkAll in the old code; passing model doesn't change behavior
+	// unless it matches the special DGS-1100-26/ME case (it won't).
+	portMap := make(map[int]domain.Port)
+	if err := snmpx.GetMacAddresses(snmp, s.aliases, portMap, ""); err != nil {
+		return nil, err
+	}
+
+	out := make(map[int][]string, len(portMap))
+	for k, p := range portMap {
+		out[k] = p.Macs
+	}
+	return out, nil
 }
 
 func getPortsMode(snmp *g.GoSNMP, portMap map[int]domain.Port, oid, switchModel string) error {

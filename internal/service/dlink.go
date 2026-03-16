@@ -76,8 +76,6 @@ func (s *DlinkService) Get(ip string) (*domain.ViewData, error) {
 		_ = getDGSPortsSpeed(snmp, portMap, sw.Speed)
 	}
 
-	_ = snmpx.GetMacAddresses(snmp, s.aliases, portMap, switchModel)
-
 	firmware, _ := snmpx.GetStringValue(snmp, sw.Firmware)
 
 	SN := "#Неизвестно"
@@ -103,6 +101,40 @@ func (s *DlinkService) Get(ip string) (*domain.ViewData, error) {
 		CanChange:          sw.PortDesc != "" && sw.SaveConfig != "",
 		CanChangeBandwidth: canChangeBandwidth,
 	}, nil
+}
+
+func (s *DlinkService) GetMacs(ip string) (map[int][]string, error) {
+	snmp := snmpx.NewClient(ip, s.cfg.DlinkReadOnlyCommunity)
+	if err := snmp.Connect(); err != nil {
+		return nil, err
+	}
+	defer snmp.Conn.Close()
+
+	switchModel, err := getSwitchModel(snmp)
+	if err != nil {
+		return nil, err
+	}
+
+	// Normalize model to known keys when possible, to keep legacy walk/bulk behavior.
+	if _, ok := switchdb.Switches[switchModel]; !ok {
+		for key := range switchdb.Switches {
+			if strings.Contains(switchModel, key) {
+				switchModel = key
+				break
+			}
+		}
+	}
+
+	portMap := make(map[int]domain.Port)
+	if err := snmpx.GetMacAddresses(snmp, s.aliases, portMap, switchModel); err != nil {
+		return nil, err
+	}
+
+	out := make(map[int][]string, len(portMap))
+	for k, p := range portMap {
+		out[k] = p.Macs
+	}
+	return out, nil
 }
 
 type ChangePortDescriptionRequest struct {
