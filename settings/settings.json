@@ -1,7 +1,0 @@
-{
-  "Address": "localhost",
-  "Port": "8080",
-  "EltexReadOnlyCommunity": "public",
-  "DlinkReadOnlyCommunity": "public",
-  "ReadWriteCommunity": "private"
-}

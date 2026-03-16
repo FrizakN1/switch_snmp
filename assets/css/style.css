@@ -92,14 +92,17 @@ h3 span {
     cursor: pointer;
 }
 
+.col0 {
+    padding: unset !important;
+    text-align: center;
+}
+
 .col1 {
     width: 4%;
 }.col2 {
     width: 5%;
 }.col3 {
     width: 6%;
-}.col4{
-    width: 37%;
 }.col5 {
     width: 37%;
     padding-right: 32px;
@@ -108,7 +111,7 @@ h3 span {
     width: 11%;
 }
 
-.col5 img {
+.col5 img, .col7 img {
     position: absolute;
     cursor: pointer;
     width: 23px;
@@ -122,6 +125,31 @@ h3 span {
 }
 
 .col5 button {
+    display: inline-block;
+    width: 20%;
+}
+
+.col7 {
+    width: 20%;
+    padding-right: 32px;
+    position: relative;
+}
+
+.col7 img {
+    position: absolute;
+    cursor: pointer;
+    width: 23px;
+    right: 5px;
+    top: 4px;
+}
+
+.col7 input {
+    display: inline-block;
+    width: 35%;
+    margin-right: 5px;
+}
+
+.col7 button {
     display: inline-block;
     width: 20%;
 }
