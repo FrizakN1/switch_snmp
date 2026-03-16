@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/joho/godotenv"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -16,8 +17,13 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	// Load .env into the process env if present. Missing file is OK.
-	_ = godotenv.Load()
+	// Load .env into the process env.
+	// Common failure on VMs: process starts with a different working directory, so ".env" isn't found.
+	// Another common failure: ".env" exists but is saved in a wrong encoding, and parsing fails.
+	loadedFrom, err := loadDotEnv()
+	if err != nil {
+		return nil, err
+	}
 
 	cfg := Config{
 		Address: "localhost",
@@ -52,8 +58,54 @@ func Load() (*Config, error) {
 		missing = append(missing, "SNMP_RW_COMMUNITY")
 	}
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("missing required env vars: %v", missing)
+		hint := ""
+		if loadedFrom == "" {
+			hint = " (.env was not loaded; set env vars or set SNMP_ENV_FILE=/path/to/.env, or run from the repo root)"
+		} else {
+			hint = fmt.Sprintf(" (.env loaded from %q)", loadedFrom)
+		}
+		return nil, fmt.Errorf("missing required env vars: %v%s", missing, hint)
 	}
 
 	return &cfg, nil
+}
+
+func loadDotEnv() (string, error) {
+	// Explicit path takes priority.
+	if p := strings.TrimSpace(os.Getenv("SNMP_ENV_FILE")); p != "" {
+		if err := godotenv.Load(p); err != nil {
+			return "", fmt.Errorf("failed to load SNMP_ENV_FILE=%q: %w", p, err)
+		}
+		return p, nil
+	}
+
+	// 1) Current working directory.
+	if _, err := os.Stat(".env"); err == nil {
+		if err := godotenv.Load(".env"); err != nil {
+			return "", fmt.Errorf("found .env in working directory but failed to parse it: %w", err)
+		}
+		return ".env", nil
+	}
+
+	// 2) Directory of the executable and a couple of parents (useful for service managers).
+	exe, err := os.Executable()
+	if err == nil {
+		dir := filepath.Dir(exe)
+		candidates := []string{
+			filepath.Join(dir, ".env"),
+			filepath.Join(filepath.Dir(dir), ".env"),
+			filepath.Join(filepath.Dir(filepath.Dir(dir)), ".env"),
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				if err := godotenv.Load(c); err != nil {
+					return "", fmt.Errorf("found .env at %q but failed to parse it: %w", c, err)
+				}
+				return c, nil
+			}
+		}
+	}
+
+	// Not found: OK, we might run with real environment variables.
+	return "", nil
 }
