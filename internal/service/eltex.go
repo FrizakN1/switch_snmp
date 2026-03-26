@@ -49,7 +49,7 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 
 	portMap := make(map[int]domain.Port)
 
-	if switchModel == "MES2324FB" {
+	if switchModel == "MES2324FB" || switchModel == "MES2300-24" {
 		for i := 1; i < 5; i++ {
 			oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
 			if err := getEltexPortsVlan(snmp, portMap, oid, i); err != nil {

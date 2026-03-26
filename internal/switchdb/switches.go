@@ -164,6 +164,19 @@ var Switches = map[string]domain.SwitchOID{
 		CPUTemperature:            "1.3.6.1.4.1.89.53.15.1.10.1",
 		TransceiverInfo:           "1.3.6.1.4.1.89.90.1.2.1.3",
 	},
+	"MES2300-24": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
+		Firmware:                  "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
+		SystemName:                "1.3.6.1.2.1.1.5.0",
+		SN:                        "1.3.6.1.4.1.89.53.14.1.5.1",
+		SaveConfig:                "1.3.6.1.4.1.89.87.2.1",
+		PortDesc:                  "1.3.6.1.2.1.31.1.1.1.18",
+		PortAmount:                28,
+		PortMode:                  "1.3.6.1.4.1.2076.65.1.10.1.2",
+		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.35265.1.139.6.1.1.2.1.0",
+		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.35265.1.139.6.1.1.2.2.0",
+		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.35265.1.139.6.1.1.2.3.0",
+		CPUTemperature:            "1.3.6.1.4.1.2076.81.1.66.0",
+	},
 	"MES2428B": { //https://eltex-msk.ru/docsnew/MES2428B/mes-configuration-and-monitoring-via-snmp-10363.pdf?ysclid=mm1ryun5cm863179458
 		Firmware:                  "1.3.6.1.4.1.35265.1.139.18.1.1.3.1.1.4.1.1",
 		SystemName:                "1.3.6.1.2.1.1.5.0",
@@ -181,6 +194,7 @@ var Switches = map[string]domain.SwitchOID{
 		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.35265.1.139.6.1.1.2.3.0",
 		CPUTemperature:            "1.3.6.1.4.1.2076.81.1.66.0",
 	},
+
 	//snmpset -v2c -c <community> <IP address> \
 	//1.3.6.1.4.1.89.87.2.1.3.1 i {local(1)} \
 	//1.3.6.1.4.1.89.87.2.1.7.1 i {runningConfig(2)} \
