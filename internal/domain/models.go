@@ -59,3 +59,10 @@ type ViewData struct {
 	CPUUtilizationFiveMinutes string
 	CPUTemperature            string
 }
+
+type TVBSViewData struct {
+	IP           string
+	SerialNumber string
+	OutputPower  string
+	InputPower   string
+}

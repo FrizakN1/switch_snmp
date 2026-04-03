@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -11,6 +12,7 @@ type Config struct {
 	Port                   string
 	EltexReadOnlyCommunity string
 	DlinkReadOnlyCommunity string
+	TVBSReadOnlyCommunity  string
 	ReadWriteCommunity     string
 }
 
@@ -36,6 +38,9 @@ func Load() (*Config, error) {
 	if v := os.Getenv("SNMP_DLINK_RO_COMMUNITY"); v != "" {
 		cfg.DlinkReadOnlyCommunity = v
 	}
+	if v := os.Getenv("SNMP_TVBS_RO_COMMUNITY"); v != "" {
+		cfg.TVBSReadOnlyCommunity = v
+	}
 	if v := os.Getenv("SNMP_RW_COMMUNITY"); v != "" {
 		cfg.ReadWriteCommunity = v
 	}
@@ -46,6 +51,9 @@ func Load() (*Config, error) {
 	}
 	if cfg.DlinkReadOnlyCommunity == "" {
 		missing = append(missing, "SNMP_DLINK_RO_COMMUNITY")
+	}
+	if cfg.TVBSReadOnlyCommunity == "" {
+		missing = append(missing, "SNMP_TVBS_RO_COMMUNITY")
 	}
 	if cfg.ReadWriteCommunity == "" {
 		missing = append(missing, "SNMP_RW_COMMUNITY")

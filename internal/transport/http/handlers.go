@@ -30,6 +30,24 @@ func (s *Server) handleGetDlink(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", data)
 }
 
+func (s *Server) handleGetTVBS(c *gin.Context) {
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in GET tvbs ip=%q", ip)
+		c.HTML(http.StatusBadRequest, "error", nil)
+		return
+	}
+
+	data, err := s.tvbs.Get(ip)
+	if err != nil {
+		log.Printf("tvbs.Get failed ip=%q err=%v", ip, err)
+		c.HTML(http.StatusBadGateway, "error", nil)
+		return
+	}
+
+	c.HTML(http.StatusOK, "tvbs", data)
+}
+
 func (s *Server) handleGetDlinkMacs(c *gin.Context) {
 	ip := c.Param("ip")
 	if net.ParseIP(ip) == nil {

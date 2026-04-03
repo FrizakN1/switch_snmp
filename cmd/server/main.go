@@ -23,8 +23,9 @@ func main() {
 
 	dlink := service.NewDlink(cfg, aliasStore)
 	eltex := service.NewEltex(cfg, aliasStore)
+	tvbs := service.NewTVBS(cfg)
 
-	srv := httptransport.NewServer(cfg, dlink, eltex)
+	srv := httptransport.NewServer(cfg, dlink, eltex, tvbs)
 	addr := fmt.Sprintf("%s:%s", cfg.Address, cfg.Port)
 	if err := srv.Router().Run(addr); err != nil {
 		log.Fatal(err)
