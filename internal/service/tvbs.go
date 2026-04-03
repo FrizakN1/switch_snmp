@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -37,11 +38,13 @@ func (s *TVBSService) Get(ip string) (*domain.TVBSViewData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get output power: %w", err)
 	}
+	outputPower = formatPowerToDBm(outputPower)
 
 	inputPower, err := getAnySNMPValue(snmp, tvbsInputPowerOID)
 	if err != nil {
 		return nil, fmt.Errorf("get input power: %w", err)
 	}
+	inputPower = formatPowerToDBm(inputPower)
 
 	serialNumber, err := getAnySNMPValue(snmp, tvbsSerialNumberOID)
 	if err != nil {
@@ -84,4 +87,14 @@ func getAnySNMPValue(s *gosnmp.GoSNMP, oid string) (string, error) {
 		}
 		return fmt.Sprint(v), nil
 	}
+}
+
+func formatPowerToDBm(raw string) string {
+	value, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
+	if err != nil {
+		return raw
+	}
+
+	dbm := math.Round((value/10)*100) / 100
+	return strconv.FormatFloat(dbm, 'f', -1, 64) + " dBm"
 }
