@@ -5,10 +5,7 @@ import (
 	"math"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -101,23 +98,13 @@ func (s *Server) handleGetEltexSwitches(c *gin.Context) {
 func (s *Server) handleAddEltexSwitches(c *gin.Context) {
 	rawIPs := c.PostForm("ips")
 
-	added, invalid, err := s.eltex.AddSwitchIPs(rawIPs)
-	if err != nil {
+	if err := s.eltex.AddSwitchIPs(rawIPs); err != nil {
 		log.Printf("eltex.AddSwitchIPs failed err=%v", err)
 		c.HTML(http.StatusBadGateway, "error", nil)
 		return
 	}
 
-	query := url.Values{}
-	query.Set("added", strconv.Itoa(added))
-	if len(invalid) > 0 {
-		query.Set("invalid", strings.Join(invalid, ","))
-	}
-	if added == 0 && len(invalid) > 0 {
-		query.Set("ips", rawIPs)
-	}
-
-	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches?"+query.Encode())
+	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches")
 }
 
 func (s *Server) handleGetEltexMacs(c *gin.Context) {

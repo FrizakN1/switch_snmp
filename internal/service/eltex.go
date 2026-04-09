@@ -101,10 +101,10 @@ func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
 	return summary
 }
 
-func (s *EltexService) AddSwitchIPs(raw string) (int, []string, error) {
+func (s *EltexService) AddSwitchIPs(raw string) error {
 	existing, err := s.readSwitchIPs()
 	if err != nil {
-		return 0, nil, err
+		return err
 	}
 
 	known := make(map[string]struct{}, len(existing))
@@ -113,7 +113,6 @@ func (s *EltexService) AddSwitchIPs(raw string) (int, []string, error) {
 	}
 
 	var toAppend []string
-	var invalid []string
 	for _, token := range splitIPs(raw) {
 		ip := strings.TrimSpace(token)
 		if ip == "" {
@@ -122,7 +121,6 @@ func (s *EltexService) AddSwitchIPs(raw string) (int, []string, error) {
 
 		parsed := net.ParseIP(ip)
 		if parsed == nil || parsed.To4() == nil {
-			invalid = append(invalid, ip)
 			continue
 		}
 
@@ -135,32 +133,32 @@ func (s *EltexService) AddSwitchIPs(raw string) (int, []string, error) {
 	}
 
 	if len(toAppend) == 0 {
-		return 0, invalid, nil
+		return nil
 	}
 
 	f, err := os.OpenFile(s.cfg.SwitchesFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
-		return 0, nil, err
+		return err
 	}
 	defer f.Close()
 
 	info, err := f.Stat()
 	if err != nil {
-		return 0, nil, err
+		return err
 	}
 
 	for i, ip := range toAppend {
 		if info.Size() > 0 || i > 0 {
-			if _, err := f.WriteString("\n"); err != nil {
-				return 0, nil, err
+			if _, err = f.WriteString("\n"); err != nil {
+				return err
 			}
 		}
-		if _, err := f.WriteString(ip); err != nil {
-			return 0, nil, err
+		if _, err = f.WriteString(ip); err != nil {
+			return err
 		}
 	}
 
-	return len(toAppend), invalid, nil
+	return nil
 }
 
 func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
