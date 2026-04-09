@@ -15,25 +15,19 @@
             <button type="submit">Добавить в список</button>
         </form>
 
-        {{if gt .Added 0}}
-        <div class="flash-success">Добавлено новых IP: {{.Added}}</div>
-        {{end}}
-
-        {{if .Invalid}}
-        <div class="flash-error">Некорректные IP: {{range $index, $ip := .Invalid}}{{if $index}}, {{end}}{{$ip}}{{end}}</div>
-        {{end}}
-
         <table class="switch-list-table">
             <thead>
                 <tr>
                     <th>IP</th>
-                    <th>Firmware</th>
+                    <th>Версия ПО</th>
                     <th>S/N</th>
                     <th>Состояние батареи</th>
                     <th>Заряд батареи</th>
-                    <th>Uptime</th>
+                    <th>Время работы</th>
                     <th>Температура CPU</th>
-                    <th>CPU utilization</th>
+                    <th>CPU utilization 5sec</th>
+                    <th>CPU utilization 1min</th>
+                    <th>CPU utilization 5min</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,11 +36,13 @@
                     <td><a href="/snmp/eltex/{{.IP}}">{{.IP}}</a></td>
                     <td>{{.Firmware}}</td>
                     <td>{{.SN}}</td>
-                    <td>{{.BatteryStatus}}</td>
+                    <td class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</td>
                     <td>{{if ne .BatteryCharge "-"}}{{.BatteryCharge}}%{{else}}{{.BatteryCharge}}{{end}}</td>
                     <td>{{.Uptime}}</td>
                     <td>{{if ne .CPUTemperature "#Ошибка"}}{{.CPUTemperature}}°C{{else}}{{.CPUTemperature}}{{end}}</td>
                     <td>{{if ne .CPUUtilizationFiveSeconds "#Ошибка"}}{{.CPUUtilizationFiveSeconds}}%{{else}}{{.CPUUtilizationFiveSeconds}}{{end}}</td>
+                    <td>{{if ne .CPUUtilizationOneMinutes "#Ошибка"}}{{.CPUUtilizationOneMinutes}}%{{else}}{{.CPUUtilizationOneMinutes}}{{end}}</td>
+                    <td>{{if ne .CPUUtilizationFiveMinutes "#Ошибка"}}{{.CPUUtilizationFiveMinutes}}%{{else}}{{.CPUUtilizationFiveMinutes}}{{end}}</td>
                 </tr>
             {{else}}
                 <tr>

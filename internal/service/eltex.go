@@ -66,23 +66,36 @@ func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
 	if firmware, err := snmpx.GetStringValue(snmp, sw.Firmware); err == nil {
 		summary.Firmware = firmware
 	}
+
 	if sn, err := snmpx.GetStringValue(snmp, sw.SN); err == nil {
 		summary.SN = sn
 	}
-	if batteryStatus, _, err := getBatteryStatus(snmp, sw.BatteryStatus, "MES2324FB"); err == nil {
+
+	if batteryStatus, colorStatus, err := getBatteryStatus(snmp, sw.BatteryStatus, "MES2324FB"); err == nil {
 		summary.BatteryStatus = batteryStatus
+		summary.ColorStatus = colorStatus
 	}
+
 	if batteryCharge, err := getBatteryCharge(snmp, sw.BatteryCharge); err == nil && batteryCharge != 255 {
 		summary.BatteryCharge = strconv.Itoa(batteryCharge)
 	}
+
 	if uptime, err := snmpx.GetUptime(snmp); err == nil {
 		summary.Uptime = strings.TrimSpace(uptime)
 	}
+
 	if cpuTemp, err := snmpx.GetIntValueString(snmp, sw.CPUTemperature); err == nil {
 		summary.CPUTemperature = cpuTemp
 	}
-	if cpuUsage, err := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveSeconds); err == nil {
-		summary.CPUUtilizationFiveSeconds = cpuUsage
+
+	if cpuFiveSec, err := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveSeconds); err == nil {
+		summary.CPUUtilizationFiveSeconds = cpuFiveSec
+	}
+	if cpuOneMin, err := snmpx.GetIntValueString(snmp, sw.CPUUtilizationOneMinutes); err == nil {
+		summary.CPUUtilizationOneMinutes = cpuOneMin
+	}
+	if cpuFiveMin, err := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveMinutes); err == nil {
+		summary.CPUUtilizationFiveMinutes = cpuFiveMin
 	}
 
 	return summary
@@ -221,7 +234,7 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 		Type:                      "Eltex MES",
 		CanChange:                 false,
 		CPUUtilizationFiveSeconds: cpuFiveSec,
-		CPUUtilizationOneSeconds:  cpuOneMin,
+		CPUUtilizationOneMinutes:  cpuOneMin,
 		CPUUtilizationFiveMinutes: cpuFiveMin,
 		CPUTemperature:            cpuTemp,
 	}, nil

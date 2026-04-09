@@ -55,7 +55,7 @@ type ViewData struct {
 	CanChange                 bool
 	CanChangeBandwidth        bool
 	CPUUtilizationFiveSeconds string
-	CPUUtilizationOneSeconds  string
+	CPUUtilizationOneMinutes  string
 	CPUUtilizationFiveMinutes string
 	CPUTemperature            string
 }
@@ -72,10 +72,13 @@ type SwitchSummary struct {
 	Firmware                  string
 	SN                        string
 	BatteryStatus             string
+	ColorStatus               string
 	BatteryCharge             string
 	Uptime                    string
 	CPUTemperature            string
 	CPUUtilizationFiveSeconds string
+	CPUUtilizationOneMinutes  string
+	CPUUtilizationFiveMinutes string
 }
 
 type SwitchListViewData struct {

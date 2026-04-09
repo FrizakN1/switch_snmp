@@ -95,18 +95,6 @@ func (s *Server) handleGetEltexSwitches(c *gin.Context) {
 		return
 	}
 
-	data.IPInput = c.Query("ips")
-
-	if added := c.Query("added"); added != "" {
-		if value, err := strconv.Atoi(added); err == nil {
-			data.Added = value
-		}
-	}
-
-	if invalid := c.Query("invalid"); invalid != "" {
-		data.Invalid = strings.Split(invalid, ",")
-	}
-
 	c.HTML(http.StatusOK, "switches", data)
 }
 
