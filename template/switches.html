@@ -1,0 +1,61 @@
+{{ define "switches" }}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список коммутаторов Eltex</title>
+    <link rel="stylesheet" href="/snmp/assets/css/style.css">
+</head>
+<body class="switch-list-page">
+    <div class="switch-list-layout">
+        <h1>Список коммутаторов Eltex</h1>
+        <form class="switch-list-form" action="/snmp/eltex/switches" method="post">
+            <label for="ips">Добавить IP-адреса</label>
+            <textarea id="ips" name="ips" placeholder="10.0.0.1&#10;10.0.0.2">{{.IPInput}}</textarea>
+            <button type="submit">Добавить в список</button>
+        </form>
+
+        {{if gt .Added 0}}
+        <div class="flash-success">Добавлено новых IP: {{.Added}}</div>
+        {{end}}
+
+        {{if .Invalid}}
+        <div class="flash-error">Некорректные IP: {{range $index, $ip := .Invalid}}{{if $index}}, {{end}}{{$ip}}{{end}}</div>
+        {{end}}
+
+        <table class="switch-list-table">
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>Firmware</th>
+                    <th>S/N</th>
+                    <th>Состояние батареи</th>
+                    <th>Заряд батареи</th>
+                    <th>Uptime</th>
+                    <th>Температура CPU</th>
+                    <th>CPU utilization</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range .Switches}}
+                <tr>
+                    <td><a href="/snmp/eltex/{{.IP}}">{{.IP}}</a></td>
+                    <td>{{.Firmware}}</td>
+                    <td>{{.SN}}</td>
+                    <td>{{.BatteryStatus}}</td>
+                    <td>{{if ne .BatteryCharge "-"}}{{.BatteryCharge}}%{{else}}{{.BatteryCharge}}{{end}}</td>
+                    <td>{{.Uptime}}</td>
+                    <td>{{if ne .CPUTemperature "#Ошибка"}}{{.CPUTemperature}}°C{{else}}{{.CPUTemperature}}{{end}}</td>
+                    <td>{{if ne .CPUUtilizationFiveSeconds "#Ошибка"}}{{.CPUUtilizationFiveSeconds}}%{{else}}{{.CPUUtilizationFiveSeconds}}{{end}}</td>
+                </tr>
+            {{else}}
+                <tr>
+                    <td colspan="8">Список IP пока пуст.</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+{{ end }}
