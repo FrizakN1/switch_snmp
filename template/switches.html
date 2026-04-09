@@ -37,7 +37,7 @@
                     <td><a href="/snmp/eltex/{{.IP}}">{{.IP}}</a></td>
                     <td>{{.Firmware}}</td>
                     <td>{{.SN}}</td>
-                    <td class="bg-{{.ColorStatus}}">{{.BatteryStatus}}</td>
+                    <td class="bg-{{.ColorStatus}}" style="color: #ffffff">{{.BatteryStatus}}</td>
                     <td>{{if ne .BatteryCharge "-"}}{{.BatteryCharge}}%{{else}}{{.BatteryCharge}}{{end}}</td>
                     <td>{{.Uptime}}</td>
                     <td>{{if ne .CPUTemperature "#Ошибка"}}{{.CPUTemperature}}°C{{else}}{{.CPUTemperature}}{{end}}</td>

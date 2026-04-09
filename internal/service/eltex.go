@@ -49,6 +49,7 @@ func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
 		Firmware:                  "#Ошибка",
 		SN:                        "#Ошибка",
 		BatteryStatus:             "Неизвестно",
+		ColorStatus:               "black",
 		BatteryCharge:             "-",
 		Uptime:                    "#Ошибка",
 		CPUTemperature:            "#Ошибка",
