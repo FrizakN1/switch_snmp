@@ -43,6 +43,12 @@ body.switch-list-page {
     cursor: pointer;
 }
 
+.delete-switch-button {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
 .flash-success,
 .flash-error {
     margin-bottom: 16px;

@@ -27,6 +27,7 @@ func (s *Server) Router() *gin.Engine {
 
 	routerSNMP.GET("/eltex/switches", s.handleGetEltexSwitches)
 	routerSNMP.POST("/eltex/switches", s.handleAddEltexSwitches)
+	routerSNMP.POST("/eltex/switches/delete", s.handleDeleteEltexSwitch)
 	routerSNMP.GET("/eltex/:ip", s.handleGetEltex)
 	routerSNMP.POST("/eltex/:ip/transceiver-info", s.handleGetEltexTransceiverInfo)
 	routerSNMP.GET("/eltex/:ip/macs", s.handleGetEltexMacs)

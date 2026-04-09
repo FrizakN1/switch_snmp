@@ -161,6 +161,24 @@ func (s *EltexService) AddSwitchIPs(raw string) error {
 	return nil
 }
 
+func (s *EltexService) DeleteSwitchIP(ip string) error {
+	existing, err := s.readSwitchIPs()
+	if err != nil {
+		return err
+	}
+
+	filtered := make([]string, 0, len(existing))
+	for _, existingIP := range existing {
+		if existingIP == ip {
+			continue
+		}
+		filtered = append(filtered, existingIP)
+	}
+
+	content := strings.Join(filtered, "\n")
+	return os.WriteFile(s.cfg.SwitchesFilePath, []byte(content), 0o644)
+}
+
 func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 	snmp := snmpx.NewClient(ip, s.cfg.EltexReadOnlyCommunity)
 	if err := snmp.Connect(); err != nil {

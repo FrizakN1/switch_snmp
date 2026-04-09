@@ -107,6 +107,23 @@ func (s *Server) handleAddEltexSwitches(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches")
 }
 
+func (s *Server) handleDeleteEltexSwitch(c *gin.Context) {
+	ip := c.PostForm("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in delete switch ip=%q", ip)
+		c.HTML(http.StatusBadRequest, "error", nil)
+		return
+	}
+
+	if err := s.eltex.DeleteSwitchIP(ip); err != nil {
+		log.Printf("eltex.DeleteSwitchIP failed ip=%q err=%v", ip, err)
+		c.HTML(http.StatusBadGateway, "error", nil)
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches")
+}
+
 func (s *Server) handleGetEltexMacs(c *gin.Context) {
 	ip := c.Param("ip")
 	if net.ParseIP(ip) == nil {

@@ -28,6 +28,7 @@
                     <th>CPU utilization 5sec</th>
                     <th>CPU utilization 1min</th>
                     <th>CPU utilization 5min</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -43,10 +44,16 @@
                     <td>{{if ne .CPUUtilizationFiveSeconds "#Ошибка"}}{{.CPUUtilizationFiveSeconds}}%{{else}}{{.CPUUtilizationFiveSeconds}}{{end}}</td>
                     <td>{{if ne .CPUUtilizationOneMinutes "#Ошибка"}}{{.CPUUtilizationOneMinutes}}%{{else}}{{.CPUUtilizationOneMinutes}}{{end}}</td>
                     <td>{{if ne .CPUUtilizationFiveMinutes "#Ошибка"}}{{.CPUUtilizationFiveMinutes}}%{{else}}{{.CPUUtilizationFiveMinutes}}{{end}}</td>
+                    <td>
+                        <form action="/snmp/eltex/switches/delete" method="post">
+                            <input type="hidden" name="ip" value="{{.IP}}">
+                            <button type="submit" class="delete-switch-button">D</button>
+                        </form>
+                    </td>
                 </tr>
             {{else}}
                 <tr>
-                    <td colspan="8">Список IP пока пуст.</td>
+                    <td colspan="9">Список IP пока пуст.</td>
                 </tr>
             {{end}}
             </tbody>
