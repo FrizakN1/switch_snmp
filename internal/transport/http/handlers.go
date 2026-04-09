@@ -5,7 +5,10 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -82,6 +85,51 @@ func (s *Server) handleGetEltex(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "index", data)
+}
+
+func (s *Server) handleGetEltexSwitches(c *gin.Context) {
+	data, err := s.eltex.GetSwitchListViewData()
+	if err != nil {
+		log.Printf("eltex.GetSwitchListViewData failed err=%v", err)
+		c.HTML(http.StatusBadGateway, "error", nil)
+		return
+	}
+
+	data.IPInput = c.Query("ips")
+
+	if added := c.Query("added"); added != "" {
+		if value, err := strconv.Atoi(added); err == nil {
+			data.Added = value
+		}
+	}
+
+	if invalid := c.Query("invalid"); invalid != "" {
+		data.Invalid = strings.Split(invalid, ",")
+	}
+
+	c.HTML(http.StatusOK, "switches", data)
+}
+
+func (s *Server) handleAddEltexSwitches(c *gin.Context) {
+	rawIPs := c.PostForm("ips")
+
+	added, invalid, err := s.eltex.AddSwitchIPs(rawIPs)
+	if err != nil {
+		log.Printf("eltex.AddSwitchIPs failed err=%v", err)
+		c.HTML(http.StatusBadGateway, "error", nil)
+		return
+	}
+
+	query := url.Values{}
+	query.Set("added", strconv.Itoa(added))
+	if len(invalid) > 0 {
+		query.Set("invalid", strings.Join(invalid, ","))
+	}
+	if added == 0 && len(invalid) > 0 {
+		query.Set("ips", rawIPs)
+	}
+
+	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches?"+query.Encode())
 }
 
 func (s *Server) handleGetEltexMacs(c *gin.Context) {

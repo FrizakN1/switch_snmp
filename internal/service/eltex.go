@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"net"
+	"os"
 	"strconv"
 	"strings"
 
@@ -22,6 +25,129 @@ type EltexService struct {
 
 func NewEltex(cfg *config.Config, aliases *aliases.Store) *EltexService {
 	return &EltexService{cfg: cfg, aliases: aliases}
+}
+
+func (s *EltexService) GetSwitchListViewData() (*domain.SwitchListViewData, error) {
+	ips, err := s.readSwitchIPs()
+	if err != nil {
+		return nil, err
+	}
+
+	switches := make([]domain.SwitchSummary, 0, len(ips))
+	for _, ip := range ips {
+		switches = append(switches, s.GetSwitchSummary(ip))
+	}
+
+	return &domain.SwitchListViewData{
+		Switches: switches,
+	}, nil
+}
+
+func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
+	summary := domain.SwitchSummary{
+		IP:                        ip,
+		Firmware:                  "#Ошибка",
+		SN:                        "#Ошибка",
+		BatteryStatus:             "Неизвестно",
+		BatteryCharge:             "-",
+		Uptime:                    "#Ошибка",
+		CPUTemperature:            "#Ошибка",
+		CPUUtilizationFiveSeconds: "#Ошибка",
+	}
+
+	snmp := snmpx.NewClient(ip, s.cfg.EltexReadOnlyCommunity)
+	if err := snmp.Connect(); err != nil {
+		return summary
+	}
+	defer snmp.Conn.Close()
+
+	sw := switchdb.Switches["MES2324FB"]
+
+	if firmware, err := snmpx.GetStringValue(snmp, sw.Firmware); err == nil {
+		summary.Firmware = firmware
+	}
+	if sn, err := snmpx.GetStringValue(snmp, sw.SN); err == nil {
+		summary.SN = sn
+	}
+	if batteryStatus, _, err := getBatteryStatus(snmp, sw.BatteryStatus, "MES2324FB"); err == nil {
+		summary.BatteryStatus = batteryStatus
+	}
+	if batteryCharge, err := getBatteryCharge(snmp, sw.BatteryCharge); err == nil && batteryCharge != 255 {
+		summary.BatteryCharge = strconv.Itoa(batteryCharge)
+	}
+	if uptime, err := snmpx.GetUptime(snmp); err == nil {
+		summary.Uptime = strings.TrimSpace(uptime)
+	}
+	if cpuTemp, err := snmpx.GetIntValueString(snmp, sw.CPUTemperature); err == nil {
+		summary.CPUTemperature = cpuTemp
+	}
+	if cpuUsage, err := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveSeconds); err == nil {
+		summary.CPUUtilizationFiveSeconds = cpuUsage
+	}
+
+	return summary
+}
+
+func (s *EltexService) AddSwitchIPs(raw string) (int, []string, error) {
+	existing, err := s.readSwitchIPs()
+	if err != nil {
+		return 0, nil, err
+	}
+
+	known := make(map[string]struct{}, len(existing))
+	for _, ip := range existing {
+		known[ip] = struct{}{}
+	}
+
+	var toAppend []string
+	var invalid []string
+	for _, token := range splitIPs(raw) {
+		ip := strings.TrimSpace(token)
+		if ip == "" {
+			continue
+		}
+
+		parsed := net.ParseIP(ip)
+		if parsed == nil || parsed.To4() == nil {
+			invalid = append(invalid, ip)
+			continue
+		}
+
+		if _, ok := known[ip]; ok {
+			continue
+		}
+
+		known[ip] = struct{}{}
+		toAppend = append(toAppend, ip)
+	}
+
+	if len(toAppend) == 0 {
+		return 0, invalid, nil
+	}
+
+	f, err := os.OpenFile(s.cfg.SwitchesFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		return 0, nil, err
+	}
+
+	for i, ip := range toAppend {
+		if info.Size() > 0 || i > 0 {
+			if _, err := f.WriteString("\n"); err != nil {
+				return 0, nil, err
+			}
+		}
+		if _, err := f.WriteString(ip); err != nil {
+			return 0, nil, err
+		}
+	}
+
+	return len(toAppend), invalid, nil
 }
 
 func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
@@ -221,6 +347,49 @@ func getPortsMode(snmp *g.GoSNMP, portMap map[int]domain.Port, oid, switchModel 
 	}
 
 	return nil
+}
+
+func (s *EltexService) readSwitchIPs() ([]string, error) {
+	f, err := os.Open(s.cfg.SwitchesFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+
+	var ips []string
+	seen := make(map[string]struct{})
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		ip := strings.TrimSpace(scanner.Text())
+		if ip == "" {
+			continue
+		}
+		if _, ok := seen[ip]; ok {
+			continue
+		}
+		seen[ip] = struct{}{}
+		ips = append(ips, ip)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return ips, nil
+}
+
+func splitIPs(raw string) []string {
+	return strings.FieldsFunc(raw, func(r rune) bool {
+		switch r {
+		case '\n', '\r', '\t', ' ', ',', ';':
+			return true
+		default:
+			return false
+		}
+	})
 }
 
 func getBatteryStatus(snmp *g.GoSNMP, oid, switchModel string) (string, string, error) {

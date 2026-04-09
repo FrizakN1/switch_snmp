@@ -14,6 +14,7 @@ type Config struct {
 	DlinkReadOnlyCommunity string
 	TVBSReadOnlyCommunity  string
 	ReadWriteCommunity     string
+	SwitchesFilePath       string
 }
 
 func Load() (*Config, error) {
@@ -21,8 +22,9 @@ func Load() (*Config, error) {
 	_ = godotenv.Load()
 
 	cfg := Config{
-		Address: "localhost",
-		Port:    "8080",
+		Address:          "localhost",
+		Port:             "8080",
+		SwitchesFilePath: "switches.txt",
 	}
 
 	// Environment config (useful for secrets and deployment).
@@ -43,6 +45,9 @@ func Load() (*Config, error) {
 	}
 	if v := os.Getenv("SNMP_RW_COMMUNITY"); v != "" {
 		cfg.ReadWriteCommunity = v
+	}
+	if v := os.Getenv("SNMP_SWITCHES_FILE"); v != "" {
+		cfg.SwitchesFilePath = v
 	}
 
 	var missing []string

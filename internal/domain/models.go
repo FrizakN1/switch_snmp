@@ -66,3 +66,21 @@ type TVBSViewData struct {
 	OutputPower  string
 	InputPower   string
 }
+
+type SwitchSummary struct {
+	IP                        string
+	Firmware                  string
+	SN                        string
+	BatteryStatus             string
+	BatteryCharge             string
+	Uptime                    string
+	CPUTemperature            string
+	CPUUtilizationFiveSeconds string
+}
+
+type SwitchListViewData struct {
+	Switches []SwitchSummary
+	IPInput  string
+	Added    int
+	Invalid  []string
+}
