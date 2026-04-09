@@ -100,28 +100,28 @@ func (s *Server) handleAddEltexSwitches(c *gin.Context) {
 
 	if err := s.eltex.AddSwitchIPs(rawIPs); err != nil {
 		log.Printf("eltex.AddSwitchIPs failed err=%v", err)
-		c.HTML(http.StatusBadGateway, "error", nil)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "failed to add ip list"})
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches")
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (s *Server) handleDeleteEltexSwitch(c *gin.Context) {
 	ip := c.PostForm("ip")
 	if net.ParseIP(ip) == nil {
 		log.Printf("invalid ip in delete switch ip=%q", ip)
-		c.HTML(http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid ip"})
 		return
 	}
 
 	if err := s.eltex.DeleteSwitchIP(ip); err != nil {
 		log.Printf("eltex.DeleteSwitchIP failed ip=%q err=%v", ip, err)
-		c.HTML(http.StatusBadGateway, "error", nil)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "failed to delete ip"})
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther, "/snmp/eltex/switches")
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (s *Server) handleGetEltexMacs(c *gin.Context) {

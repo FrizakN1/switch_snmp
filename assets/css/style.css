@@ -43,10 +43,10 @@ body.switch-list-page {
     cursor: pointer;
 }
 
-.delete-switch-button {
-    width: 32px;
-    height: 32px;
+.delete-switch-icon {
     cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .flash-success,

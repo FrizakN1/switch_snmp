@@ -9,11 +9,11 @@
 <body class="switch-list-page">
     <div class="switch-list-layout">
         <h1>Список коммутаторов Eltex</h1>
-        <form class="switch-list-form" action="/snmp/eltex/switches" method="post">
+        <div class="switch-list-form">
             <label for="ips">Добавить IP-адреса</label>
             <textarea id="ips" name="ips" placeholder="172.24.0.1&#10;172.24.0.2">{{.IPInput}}</textarea>
-            <button type="submit">Добавить в список</button>
-        </form>
+            <button type="button" onclick="handlerAddEltexSwitches()">Добавить в список</button>
+        </div>
 
         <table class="switch-list-table">
             <thead>
@@ -45,10 +45,7 @@
                     <td>{{if ne .CPUUtilizationOneMinutes "#Ошибка"}}{{.CPUUtilizationOneMinutes}}%{{else}}{{.CPUUtilizationOneMinutes}}{{end}}</td>
                     <td>{{if ne .CPUUtilizationFiveMinutes "#Ошибка"}}{{.CPUUtilizationFiveMinutes}}%{{else}}{{.CPUUtilizationFiveMinutes}}{{end}}</td>
                     <td>
-                        <form action="/snmp/eltex/switches/delete" method="post">
-                            <input type="hidden" name="ip" value="{{.IP}}">
-                            <button type="submit" class="delete-switch-button"><img src="/snmp/assets/public/trash.svg" alt="loading" width="16"></button>
-                        </form>
+                        <img class="delete-switch-icon" src="/snmp/assets/public/trash.svg" alt="delete" width="16" onclick="handlerDeleteEltexSwitch('{{.IP}}')">
                     </td>
                 </tr>
             {{else}}
@@ -59,6 +56,7 @@
             </tbody>
         </table>
     </div>
+    <script src="/snmp/assets/js/script.js"></script>
 </body>
 </html>
 {{ end }}

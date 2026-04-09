@@ -15,6 +15,57 @@ const handlerChangeShownColumn = (el) => {
     }
 }
 
+function handlerAddEltexSwitches() {
+    const textarea = document.querySelector("#ips")
+    if (!textarea) return
+
+    fetch("/snmp/eltex/switches", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: new URLSearchParams({
+            ips: textarea.value
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.ok) {
+                window.location.reload()
+                return
+            }
+            alert("не удалось добавить IP")
+        })
+        .catch(error => {
+            console.error(error)
+            alert("не удалось добавить IP")
+        })
+}
+
+function handlerDeleteEltexSwitch(ip) {
+    fetch("/snmp/eltex/switches/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: new URLSearchParams({
+            ip: ip
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.ok) {
+                window.location.reload()
+                return
+            }
+            alert("не удалось удалить IP")
+        })
+        .catch(error => {
+            console.error(error)
+            alert("не удалось удалить IP")
+        })
+}
+
 function handlerTransformColumn(el) {
     let col = el.parentNode
     let value = col.innerText
