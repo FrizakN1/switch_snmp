@@ -45,7 +45,7 @@
                     <td>{{if ne .CPUUtilizationOneMinutes "#Ошибка"}}{{.CPUUtilizationOneMinutes}}%{{else}}{{.CPUUtilizationOneMinutes}}{{end}}</td>
                     <td>{{if ne .CPUUtilizationFiveMinutes "#Ошибка"}}{{.CPUUtilizationFiveMinutes}}%{{else}}{{.CPUUtilizationFiveMinutes}}{{end}}</td>
                     <td>
-                        <img class="delete-switch-icon" src="/snmp/assets/public/trash.svg" alt="delete" width="16" onclick="handlerDeleteEltexSwitch('{{.IP}}')">
+                        <img class="delete-switch-icon" src="/snmp/assets/public/trash.svg" alt="delete" width="35" onclick="handlerDeleteEltexSwitch('{{.IP}}')">
                     </td>
                 </tr>
             {{else}}
