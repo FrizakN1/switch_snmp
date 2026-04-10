@@ -9,12 +9,6 @@
 <body class="switch-list-page">
     <div class="switch-list-layout">
         <h1>Список коммутаторов Eltex</h1>
-        <div class="switch-list-form">
-            <label for="ips">Добавить IP-адреса</label>
-            <textarea id="ips" name="ips" placeholder="172.24.0.1&#10;172.24.0.2">{{.IPInput}}</textarea>
-            <button type="button" onclick="handlerAddEltexSwitches()">Добавить в список</button>
-        </div>
-
         <table class="switch-list-table">
             <thead>
                 <tr>
@@ -57,6 +51,12 @@
             {{end}}
             </tbody>
         </table>
+
+        <div class="switch-list-form">
+            <label for="ips">Добавить IP-адреса</label>
+            <textarea id="ips" name="ips" placeholder="172.24.0.1&#10;172.24.0.2">{{.IPInput}}</textarea>
+            <button type="button" onclick="handlerAddEltexSwitches()">Добавить в список</button>
+        </div>
     </div>
     <script src="/snmp/assets/js/script.js"></script>
 </body>
