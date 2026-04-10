@@ -46,6 +46,7 @@ func (s *EltexService) GetSwitchListViewData() (*domain.SwitchListViewData, erro
 func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
 	summary := domain.SwitchSummary{
 		IP:                        ip,
+		SysLocation:               "#Ошибка",
 		Firmware:                  "#Ошибка",
 		SN:                        "#Ошибка",
 		BatteryStatus:             "Неизвестно",
@@ -66,6 +67,9 @@ func (s *EltexService) GetSwitchSummary(ip string) domain.SwitchSummary {
 
 	if firmware, err := snmpx.GetStringValue(snmp, sw.Firmware); err == nil {
 		summary.Firmware = firmware
+	}
+	if sysLocation, err := snmpx.GetStringValue(snmp, sw.SysLocation); err == nil {
+		summary.SysLocation = sysLocation
 	}
 
 	if sn, err := snmpx.GetStringValue(snmp, sw.SN); err == nil {

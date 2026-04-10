@@ -19,15 +19,16 @@
             <thead>
                 <tr>
                     <th>IP</th>
+                    <th>Адрес</th>
                     <th>Версия ПО</th>
                     <th>S/N</th>
                     <th>Состояние батареи</th>
                     <th>Заряд батареи</th>
                     <th>Время работы</th>
-                    <th>Температура CPU</th>
-                    <th>CPU utilization 5sec</th>
-                    <th>CPU utilization 1min</th>
-                    <th>CPU utilization 5min</th>
+                    <th>CPU t°</th>
+                    <th>load 5sec</th>
+                    <th>load 1min</th>
+                    <th>load 5min</th>
                     <th></th>
                 </tr>
             </thead>
@@ -35,6 +36,7 @@
             {{range .Switches}}
                 <tr>
                     <td><a href="/snmp/eltex/{{.IP}}">{{.IP}}</a></td>
+                    <td>{{.SysLocation}}</td>
                     <td>{{.Firmware}}</td>
                     <td>{{.SN}}</td>
                     <td class="bg-{{.ColorStatus}}" style="color: #ffffff">{{.BatteryStatus}}</td>
@@ -50,7 +52,7 @@
                 </tr>
             {{else}}
                 <tr>
-                    <td colspan="9">Список IP пока пуст.</td>
+                    <td colspan="12">Список IP пока пуст.</td>
                 </tr>
             {{end}}
             </tbody>

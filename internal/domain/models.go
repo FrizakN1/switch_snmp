@@ -20,6 +20,7 @@ type MacAlias struct {
 type SwitchOID struct {
 	Firmware                  string
 	SystemName                string
+	SysLocation               string
 	SN                        string
 	Uptime                    string
 	SaveConfig                string
@@ -69,6 +70,7 @@ type TVBSViewData struct {
 
 type SwitchSummary struct {
 	IP                        string
+	SysLocation               string
 	Firmware                  string
 	SN                        string
 	BatteryStatus             string
