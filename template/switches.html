@@ -13,6 +13,7 @@
             <thead>
                 <tr>
                     <th>IP</th>
+                    <th>SystemName</th>
                     <th>Адрес</th>
                     <th>Версия ПО</th>
                     <th>S/N</th>
@@ -30,6 +31,7 @@
             {{range .Switches}}
                 <tr>
                     <td><a href="/snmp/eltex/{{.IP}}">{{.IP}}</a></td>
+                    <td>{{.SystemName}}</td>
                     <td>{{.SysLocation}}</td>
                     <td>{{.Firmware}}</td>
                     <td>{{.SN}}</td>
@@ -46,7 +48,7 @@
                 </tr>
             {{else}}
                 <tr>
-                    <td colspan="12">Список IP пока пуст.</td>
+                    <td colspan="13">Список IP пока пуст.</td>
                 </tr>
             {{end}}
             </tbody>

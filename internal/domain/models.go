@@ -70,6 +70,7 @@ type TVBSViewData struct {
 
 type SwitchSummary struct {
 	IP                        string
+	SystemName                string
 	SysLocation               string
 	Firmware                  string
 	SN                        string
