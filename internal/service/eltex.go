@@ -213,14 +213,7 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 
 	portMap := make(map[int]domain.Port)
 
-	if switchModel == "MES2324FB" || switchModel == "MES2300-24" {
-		for i := 1; i < 5; i++ {
-			oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
-			if err := getEltexPortsVlan(snmp, portMap, oid, i); err != nil {
-				return nil, err
-			}
-		}
-	} else {
+	if switchModel == "MES2428B" {
 		for i := 1; i <= sw.PortAmount; i++ {
 			portMap[i] = domain.Port{Index: i}
 		}
@@ -229,6 +222,13 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 			return nil, err
 		}
 		formatVlans(portMap)
+	} else {
+		for i := 1; i < 5; i++ {
+			oid := "1.3.6.1.4.1.89.48.68.1." + strconv.Itoa(i)
+			if err := getEltexPortsVlan(snmp, portMap, oid, i); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	_ = snmpx.GetPortsDescription(snmp, portMap, sw, "")
