@@ -22,10 +22,11 @@ func main() {
 	}
 
 	dlink := service.NewDlink(cfg, aliasStore)
+	cisco := service.NewCisco(cfg, aliasStore)
 	eltex := service.NewEltex(cfg, aliasStore)
 	tvbs := service.NewTVBS(cfg)
 
-	srv := httptransport.NewServer(cfg, dlink, eltex, tvbs)
+	srv := httptransport.NewServer(cfg, dlink, cisco, eltex, tvbs)
 	addr := fmt.Sprintf("%s:%s", cfg.Address, cfg.Port)
 	if err := srv.Router().Run(addr); err != nil {
 		log.Fatal(err)

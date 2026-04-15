@@ -10,12 +10,13 @@ import (
 type Server struct {
 	cfg   *config.Config
 	dlink *service.DlinkService
+	cisco *service.CiscoService
 	eltex *service.EltexService
 	tvbs  *service.TVBSService
 }
 
-func NewServer(cfg *config.Config, dlink *service.DlinkService, eltex *service.EltexService, tvbs *service.TVBSService) *Server {
-	return &Server{cfg: cfg, dlink: dlink, eltex: eltex, tvbs: tvbs}
+func NewServer(cfg *config.Config, dlink *service.DlinkService, cisco *service.CiscoService, eltex *service.EltexService, tvbs *service.TVBSService) *Server {
+	return &Server{cfg: cfg, dlink: dlink, cisco: cisco, eltex: eltex, tvbs: tvbs}
 }
 
 func (s *Server) Router() *gin.Engine {
@@ -33,6 +34,8 @@ func (s *Server) Router() *gin.Engine {
 	routerSNMP.GET("/eltex/:ip/macs", s.handleGetEltexMacs)
 	routerSNMP.GET("/dlink/:ip", s.handleGetDlink)
 	routerSNMP.GET("/dlink/:ip/macs", s.handleGetDlinkMacs)
+	routerSNMP.GET("/cisco/:ip", s.handleGetCisco)
+	routerSNMP.GET("/cisco/:ip/macs", s.handleGetCiscoMacs)
 	routerSNMP.GET("/tvbs/:ip", s.handleGetTVBS)
 	routerSNMP.POST("/dlink/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_bandwidth/:ip", s.handleChangeBandwidth)

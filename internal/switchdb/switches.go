@@ -200,4 +200,18 @@ var Switches = map[string]domain.SwitchOID{
 		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.35265.1.139.6.1.1.2.3.0",
 		CPUTemperature:            "1.3.6.1.4.1.2076.81.1.66.0",
 	},
+
+	"Cisco": {
+		SystemName:                "1.3.6.1.2.1.1.5.0",
+		Firmware:                  "1.3.6.1.2.1.47.1.1.1.1.9.1",
+		SN:                        "1.3.6.1.2.1.47.1.1.1.1.11.1",
+		CPUUtilizationFiveSeconds: "1.3.6.1.4.1.9.2.1.56.0",
+		CPUUtilizationOneMinutes:  "1.3.6.1.4.1.9.2.1.57.1",
+		CPUUtilizationFiveMinutes: "1.3.6.1.4.1.9.2.1.58.2",
+		PortDesc:                  "1.3.6.1.2.1.31.1.1.1.18",
+		PortMode:                  "1.3.6.1.4.1.9.9.46.1.6.1.1.13",
+		PortStatus:                "1.3.6.1.2.1.2.2.1.8",
+		PortName:                  "1.3.6.1.2.1.31.1.1.1.1",
+		VlanUntagged:              "1.3.6.1.4.1.9.9.68.1.2.2.1.2",
+	},
 }

@@ -2,6 +2,7 @@ package domain
 
 type Port struct {
 	Index       int
+	Name        string
 	Vlan        string
 	Description string
 	Mode        string
@@ -39,6 +40,8 @@ type SwitchOID struct {
 	TransceiverInfo           string
 	BandwidthRX               string
 	BandwidthTX               string
+	PortStatus                string
+	PortName                  string
 }
 
 // ViewData matches fields used in template/index.html.

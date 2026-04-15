@@ -12,6 +12,7 @@ type Config struct {
 	Port                   string
 	EltexReadOnlyCommunity string
 	DlinkReadOnlyCommunity string
+	CiscoReadOnlyCommunity string
 	TVBSReadOnlyCommunity  string
 	ReadWriteCommunity     string
 	SwitchesFilePath       string
@@ -40,6 +41,9 @@ func Load() (*Config, error) {
 	if v := os.Getenv("SNMP_DLINK_RO_COMMUNITY"); v != "" {
 		cfg.DlinkReadOnlyCommunity = v
 	}
+	if v := os.Getenv("SNMP_CISCO_RO_COMMUNITY"); v != "" {
+		cfg.CiscoReadOnlyCommunity = v
+	}
 	if v := os.Getenv("SNMP_TVBS_RO_COMMUNITY"); v != "" {
 		cfg.TVBSReadOnlyCommunity = v
 	}
@@ -56,6 +60,9 @@ func Load() (*Config, error) {
 	}
 	if cfg.DlinkReadOnlyCommunity == "" {
 		missing = append(missing, "SNMP_DLINK_RO_COMMUNITY")
+	}
+	if cfg.CiscoReadOnlyCommunity == "" {
+		cfg.CiscoReadOnlyCommunity = cfg.DlinkReadOnlyCommunity
 	}
 	if cfg.TVBSReadOnlyCommunity == "" {
 		missing = append(missing, "SNMP_TVBS_RO_COMMUNITY")

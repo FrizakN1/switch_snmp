@@ -57,6 +57,7 @@ func (s *DlinkService) Get(ip string) (*domain.ViewData, error) {
 	systemName = fmt.Sprintf("%s (%s)", sysName, switchModel)
 
 	portMap := make(map[int]domain.Port)
+
 	if sw.PortDesc == "" {
 		for i := 1; i <= sw.PortAmount; i++ {
 			portMap[i] = domain.Port{Index: i}

@@ -210,6 +210,9 @@ function loadMacs() {
     if (window.location.href.includes("/snmp/dlink/")) {
         ip = window.location.href.split("snmp/dlink/")[1]
         url = `/snmp/dlink/${ip}/macs`
+    } else if (window.location.href.includes("/snmp/cisco/")) {
+        ip = window.location.href.split("snmp/cisco/")[1]
+        url = `/snmp/cisco/${ip}/macs`
     } else if (window.location.href.includes("/snmp/eltex/")) {
         ip = window.location.href.split("snmp/eltex/")[1]
         url = `/snmp/eltex/${ip}/macs`

@@ -30,6 +30,24 @@ func (s *Server) handleGetDlink(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", data)
 }
 
+func (s *Server) handleGetCisco(c *gin.Context) {
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in GET cisco ip=%q", ip)
+		c.HTML(http.StatusBadRequest, "error", nil)
+		return
+	}
+
+	data, err := s.cisco.Get(ip)
+	if err != nil {
+		log.Printf("cisco.Get failed ip=%q err=%v", ip, err)
+		c.HTML(http.StatusBadGateway, "error", nil)
+		return
+	}
+
+	c.HTML(http.StatusOK, "index", data)
+}
+
 func (s *Server) handleGetTVBS(c *gin.Context) {
 	ip := c.Param("ip")
 	if net.ParseIP(ip) == nil {
@@ -59,6 +77,24 @@ func (s *Server) handleGetDlinkMacs(c *gin.Context) {
 	ports, err := s.dlink.GetMacs(ip)
 	if err != nil {
 		log.Printf("dlink.GetMacs failed ip=%q err=%v", ip, err)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "snmp failed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true, "ports": ports})
+}
+
+func (s *Server) handleGetCiscoMacs(c *gin.Context) {
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in GET cisco macs ip=%q", ip)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid ip"})
+		return
+	}
+
+	ports, err := s.cisco.GetMacs(ip)
+	if err != nil {
+		log.Printf("cisco.GetMacs failed ip=%q err=%v", ip, err)
 		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "snmp failed"})
 		return
 	}
