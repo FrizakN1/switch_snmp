@@ -17,7 +17,7 @@ var ciscoTrunkVlanBitmapOIDs = []struct {
 	oid      string
 	baseVLAN int
 }{
-	{oid: "1.3.6.1.4.1.9.9.46.1.6.1.1.4", baseVLAN: 1},
+	{oid: "1.3.6.1.4.1.9.9.46.1.6.1.1.4", baseVLAN: 0},
 	{oid: "1.3.6.1.4.1.9.9.46.1.6.1.1.17", baseVLAN: 1024},
 	{oid: "1.3.6.1.4.1.9.9.46.1.6.1.1.18", baseVLAN: 2048},
 	{oid: "1.3.6.1.4.1.9.9.46.1.6.1.1.19", baseVLAN: 3072},
