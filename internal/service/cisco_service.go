@@ -55,16 +55,23 @@ func (s *CiscoService) Get(ip string) (*domain.ViewData, error) {
 	snValue, _ := snmpx.GetStringValue(snmp, sw.SN)
 	uptime, _ := snmpx.GetUptime(snmp)
 
+	cpuFiveSec, _ := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveSeconds)
+	cpuOneMin, _ := snmpx.GetIntValueString(snmp, sw.CPUUtilizationOneMinutes)
+	cpuFiveMin, _ := snmpx.GetIntValueString(snmp, sw.CPUUtilizationFiveMinutes)
+
 	return &domain.ViewData{
-		Ports:              portMap,
-		SystemName:         systemName,
-		SN:                 snValue,
-		IP:                 ip,
-		Firmware:           firmware,
-		Uptime:             uptime,
-		Type:               "Cisco",
-		CanChange:          false,
-		CanChangeBandwidth: false,
+		Ports:                     portMap,
+		SystemName:                systemName,
+		SN:                        snValue,
+		IP:                        ip,
+		Firmware:                  firmware,
+		Uptime:                    uptime,
+		Type:                      "Cisco",
+		CanChange:                 false,
+		CanChangeBandwidth:        false,
+		CPUUtilizationFiveSeconds: cpuFiveSec,
+		CPUUtilizationOneMinutes:  cpuOneMin,
+		CPUUtilizationFiveMinutes: cpuFiveMin,
 	}, nil
 }
 

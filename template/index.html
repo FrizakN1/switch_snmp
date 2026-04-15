@@ -13,6 +13,9 @@
     {{if eq .Type "Eltex MES"}}
     <h3>Температура CPU: {{.CPUTemperature}}°C | CPU Utilization: 5 sec: {{.CPUUtilizationFiveSeconds}}% | 1 min: {{.CPUUtilizationOneMinutes}}% | 5 min: {{.CPUUtilizationFiveMinutes}}%</h3>
     {{end}}
+    {{if eq .Type "Cisco"}}
+    <h3>CPU Utilization: 5 sec: {{.CPUUtilizationFiveSeconds}}% | 1 min: {{.CPUUtilizationOneMinutes}}% | 5 min: {{.CPUUtilizationFiveMinutes}}%</h3>
+    {{end}}
     <table>
         <thead>
             <tr>
