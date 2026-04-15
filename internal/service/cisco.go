@@ -57,6 +57,7 @@ func getCiscoPorts(snmp *g.GoSNMP, sw domain.SwitchOID) (map[int]domain.Port, er
 		}
 	}
 
+	sw.PortAmount = len(portMap)
 	portNameByIfIndex := make(map[int]string, len(portMap))
 	nameResult, err := snmp.BulkWalkAll(sw.PortName)
 	if err == nil {
