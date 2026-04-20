@@ -138,38 +138,6 @@ func (s *DlinkService) GetMacs(ip string) (map[int][]string, error) {
 	return out, nil
 }
 
-type ChangePortDescriptionRequest struct {
-	Index       int
-	SwitchModel string
-	Description string
-}
-
-func (s *DlinkService) ChangePortDescription(ip string, req ChangePortDescriptionRequest) error {
-	sw, ok := switchdb.Switches[req.SwitchModel]
-	if !ok || sw.SaveConfig == "" {
-		return fmt.Errorf("unknown switch model or SaveConfig not supported")
-	}
-
-	snmp := snmpx.NewClient(ip, s.cfg.ReadWriteCommunity)
-	if err := snmp.Connect(); err != nil {
-		return err
-	}
-	defer snmp.Conn.Close()
-
-	oid := fmt.Sprintf("1.3.6.1.2.1.31.1.1.1.18.%d", req.Index)
-	param := []g.SnmpPDU{{Name: oid, Value: req.Description, Type: g.OctetString}}
-	if _, err := snmp.Set(param); err != nil {
-		return err
-	}
-
-	param = []g.SnmpPDU{{Name: sw.SaveConfig, Value: 1, Type: g.Integer}}
-	if _, err := snmp.Set(param); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 type ChangeBandwidthRequest struct {
 	Index       int
 	SwitchModel string

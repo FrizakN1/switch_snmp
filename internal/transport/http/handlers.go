@@ -270,7 +270,7 @@ func (s *Server) handleChangePortDescription(c *gin.Context) {
 		return
 	}
 
-	err := s.dlink.ChangePortDescription(ip, service.ChangePortDescriptionRequest{
+	err := service.ChangePortDescription(ip, s.cfg.ReadWriteCommunity, service.ChangePortDescriptionRequest{
 		Index:       req.Index,
 		SwitchModel: req.SwitchModel,
 		Description: req.Description,

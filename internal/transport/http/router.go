@@ -37,6 +37,7 @@ func (s *Server) Router() *gin.Engine {
 	routerSNMP.GET("/cisco/:ip", s.handleGetCisco)
 	routerSNMP.GET("/cisco/:ip/macs", s.handleGetCiscoMacs)
 	routerSNMP.GET("/tvbs/:ip", s.handleGetTVBS)
+	routerSNMP.POST("/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_bandwidth/:ip", s.handleChangeBandwidth)
 

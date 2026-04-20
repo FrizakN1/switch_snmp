@@ -151,7 +151,7 @@ function handlerSendChange(key) {
         })
     }
 
-    fetch("/snmp/dlink/change_port_description/" + ip, options)
+    fetch("/snmp/change_port_description/" + ip, options)
         .then(response => response.json())
         .then(data => {
             if (data && data.ok) {

@@ -12,6 +12,8 @@ import (
 	"snmp/internal/domain"
 )
 
+const DefaultPortDescOID = "1.3.6.1.2.1.31.1.1.1.18"
+
 func GetUptime(s *gosnmp.GoSNMP) (string, error) {
 	result, err := s.Get([]string{"1.3.6.1.2.1.1.3.0"})
 	if err != nil {
@@ -136,20 +138,30 @@ func GetPortsSpeed(s *gosnmp.GoSNMP, portMap map[int]domain.Port) error {
 }
 
 func GetPortsDescription(s *gosnmp.GoSNMP, portMap map[int]domain.Port, sw domain.SwitchOID, switchModel string) error {
-	var result []gosnmp.SnmpPDU
-	var err error
+	if sw.PortDesc == "" {
+		return nil
+	}
 
-	if switchModel == "DGS-1100-26/ME" {
-		result, err = s.WalkAll(sw.PortDesc)
-	} else {
-		result, err = s.BulkWalkAll(sw.PortDesc)
+	usedOID := sw.PortDesc
+	result, err := walkPortDescription(s, usedOID, switchModel)
+	if err != nil || len(result) == 0 {
+		if usedOID != DefaultPortDescOID {
+			usedOID = DefaultPortDescOID
+			result, err = walkPortDescription(s, usedOID, switchModel)
+		}
 	}
 	if err != nil {
 		return err
 	}
 
 	for _, variable := range result {
-		oidParts := strings.Split(variable.Name[len(sw.PortDesc)+2:], ".")
+		if !strings.HasPrefix(variable.Name, usedOID+".") {
+			continue
+		}
+		oidParts := strings.Split(strings.TrimPrefix(variable.Name, usedOID+"."), ".")
+		if len(oidParts) == 0 {
+			continue
+		}
 
 		key, err := strconv.Atoi(oidParts[0])
 		if err != nil {
@@ -179,6 +191,13 @@ func GetPortsDescription(s *gosnmp.GoSNMP, portMap map[int]domain.Port, sw domai
 	}
 
 	return nil
+}
+
+func walkPortDescription(s *gosnmp.GoSNMP, oid string, switchModel string) ([]gosnmp.SnmpPDU, error) {
+	if switchModel == "DGS-1100-26/ME" {
+		return s.WalkAll(oid)
+	}
+	return s.BulkWalkAll(oid)
 }
 
 func GetMacAddresses(s *gosnmp.GoSNMP, aliasStore *aliases.Store, portMap map[int]domain.Port, switchModel string) error {
