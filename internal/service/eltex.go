@@ -246,6 +246,8 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 	batteryCharge, _ := getBatteryCharge(snmp, sw.BatteryCharge)
 	uptime, _ := snmpx.GetUptime(snmp)
 
+	canChange := switchModel != "MES2324FB"
+
 	return &domain.ViewData{
 		Ports:                     portMap,
 		SystemName:                systemName,
@@ -257,7 +259,7 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 		BatteryCharge:             batteryCharge,
 		Uptime:                    uptime,
 		Type:                      "Eltex MES",
-		CanChange:                 false,
+		CanChange:                 canChange,
 		CPUUtilizationFiveSeconds: cpuFiveSec,
 		CPUUtilizationOneMinutes:  cpuOneMin,
 		CPUUtilizationFiveMinutes: cpuFiveMin,
