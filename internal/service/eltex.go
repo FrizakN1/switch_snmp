@@ -236,6 +236,8 @@ func (s *EltexService) Get(ip string) (*domain.ViewData, error) {
 	_ = getPortsMode(snmp, portMap, sw.PortMode, switchModel)
 
 	systemName, _ := snmpx.GetStringValue(snmp, "1.3.6.1.2.1.1.5.0")
+	systemName = fmt.Sprintf("%s (%s)", systemName, switchModel)
+
 	batteryStatus, colorStatus, _ := getBatteryStatus(snmp, sw.BatteryStatus, switchModel)
 	firmware, _ := snmpx.GetStringValue(snmp, sw.Firmware)
 	SN, _ := snmpx.GetStringValue(snmp, sw.SN)
