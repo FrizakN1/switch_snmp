@@ -139,7 +139,7 @@ func GetPortsSpeed(s *gosnmp.GoSNMP, portMap map[int]domain.Port) error {
 
 func GetPortsDescription(s *gosnmp.GoSNMP, portMap map[int]domain.Port, sw domain.SwitchOID, switchModel string) error {
 	if sw.PortDesc == "" {
-		return nil
+		sw.PortDesc = DefaultPortDescOID
 	}
 
 	usedOID := sw.PortDesc
@@ -155,13 +155,7 @@ func GetPortsDescription(s *gosnmp.GoSNMP, portMap map[int]domain.Port, sw domai
 	}
 
 	for _, variable := range result {
-		if !strings.HasPrefix(variable.Name, usedOID+".") {
-			continue
-		}
-		oidParts := strings.Split(strings.TrimPrefix(variable.Name, usedOID+"."), ".")
-		if len(oidParts) == 0 {
-			continue
-		}
+		oidParts := strings.Split(variable.Name[len(sw.PortDesc)+2:], ".")
 
 		key, err := strconv.Atoi(oidParts[0])
 		if err != nil {
