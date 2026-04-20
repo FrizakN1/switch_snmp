@@ -18,8 +18,8 @@ type ChangePortDescriptionRequest struct {
 
 func ChangePortDescription(ip string, readWriteCommunity string, req ChangePortDescriptionRequest) error {
 	sw, ok := switchdb.Switches[req.SwitchModel]
-	if !ok || sw.SaveConfig == "" {
-		return fmt.Errorf("unknown switch model or SaveConfig not supported")
+	if !ok {
+		return fmt.Errorf("unknown switch model")
 	}
 
 	snmp := snmpx.NewClient(ip, readWriteCommunity)
@@ -49,13 +49,15 @@ func ChangePortDescription(ip string, readWriteCommunity string, req ChangePortD
 	}
 
 	if err := setPortDesc(primaryOID); err != nil {
+		if secondaryOID == "" || secondaryOID == primaryOID {
+			return err
+		}
 		if fallbackErr := setPortDesc(secondaryOID); fallbackErr != nil {
 			return fmt.Errorf("set port description failed with model oid (%s): %v; fallback oid (%s): %w", primaryOID, err, secondaryOID, fallbackErr)
 		}
 	}
 
-	param := []g.SnmpPDU{{Name: sw.SaveConfig, Value: 1, Type: g.Integer}}
-	if _, err := snmp.Set(param); err != nil {
+	if err := saveSwitchConfig(snmp, req.SwitchModel, sw); err != nil {
 		return err
 	}
 
