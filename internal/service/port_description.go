@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	g "github.com/gosnmp/gosnmp"
 
@@ -34,17 +35,22 @@ func ChangePortDescription(ip string, readWriteCommunity string, req ChangePortD
 		return err
 	}
 
-	primaryOID := sw.PortDesc
-	if primaryOID == "" {
+	model := strings.ToUpper(req.SwitchModel)
+	isEltex := strings.HasPrefix(model, "MES")
+
+	var primaryOID, secondaryOID string
+
+	if isEltex {
+		primaryOID = sw.PortDesc
+		secondaryOID = snmpx.DefaultPortDescOID
+	} else {
 		primaryOID = snmpx.DefaultPortDescOID
+		secondaryOID = sw.PortDesc
 	}
 
 	if err := setPortDesc(primaryOID); err != nil {
-		if primaryOID == snmpx.DefaultPortDescOID {
-			return err
-		}
-		if fallbackErr := setPortDesc(snmpx.DefaultPortDescOID); fallbackErr != nil {
-			return fmt.Errorf("set port description failed with model oid (%s): %v; fallback oid (%s): %w", primaryOID, err, snmpx.DefaultPortDescOID, fallbackErr)
+		if fallbackErr := setPortDesc(secondaryOID); fallbackErr != nil {
+			return fmt.Errorf("set port description failed with model oid (%s): %v; fallback oid (%s): %w", primaryOID, err, secondaryOID, fallbackErr)
 		}
 	}
 
