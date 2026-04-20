@@ -69,13 +69,28 @@ function handlerDeleteEltexSwitch(ip) {
 function handlerTransformColumn(el) {
     let col = el.parentNode
     let value = col.innerText
-    let btn = document.createElement("button")
     let key = col.id.split("-")[1]
 
-    col.innerHTML = `<input type='text' value="${value}" id="input-${key}"/> `
+    renderDescriptionEditor(key, value)
+}
 
+function renderDescriptionEditor(key, value) {
+    let col = document.querySelector(`#description-${key}`)
+    if (!col) return
+
+    col.innerHTML = ""
+
+    let input = document.createElement("input")
+    input.type = "text"
+    input.id = `input-${key}`
+    input.value = value
+
+    let btn = document.createElement("button")
     btn.setAttribute("onclick", `handlerSendChange(${key})`)
     btn.innerHTML = "Сохранить"
+
+    col.append(input)
+    col.append(document.createTextNode(" "))
     col.append(btn)
 }
 
@@ -131,8 +146,13 @@ function handlerGetTransceiverInfo(key) {
 }
 
 function handlerSendChange(key) {
-    let value = document.querySelector(`#input-${key}`).value
+    let input = document.querySelector(`#input-${key}`)
+    if (!input) return
+
+    let value = input.value
     let switchModel = document.querySelector("h1").innerHTML.match(/\(([^)]+)\)/)[1]
+    let col = document.querySelector(`#description-${key}`)
+    if (!col) return
 
     let ip
 
@@ -151,17 +171,25 @@ function handlerSendChange(key) {
         })
     }
 
+    let btn = col.querySelector("button")
+    if (btn) {
+        btn.outerHTML = `<img class="spinner desc-save-spinner" src="/snmp/assets/public/180-ring.svg" alt="loading" width="16">`
+    }
+
     fetch("/snmp/change_port_description/" + ip, options)
         .then(response => response.json())
         .then(data => {
             if (data && data.ok) {
-                let col = document.querySelector(`#description-${key}`)
                 col.innerHTML = `${value} <img onclick="handlerTransformColumn(this)" src="/snmp/assets/public/pen.svg" alt="O">`
             } else {
+                renderDescriptionEditor(key, value)
                 alert("не удалось изменить описание")
             }
         })
-        .catch(error => console.error(error))
+        .catch(error => {
+            console.error(error)
+            renderDescriptionEditor(key, value)
+        })
 }
 
 function handlerSendBandwidthChange(key) {

@@ -188,6 +188,14 @@ h3 span {
     top: 4px;
 }
 
+.col5 img.desc-save-spinner {
+    position: static;
+    cursor: default;
+    width: 16px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
 .col5 input {
     display: inline-block;
     width: 70%;
