@@ -27,6 +27,7 @@
                 {{if eq $.Type "DGS"}}<th>Bandwidth</th>{{end}}
                 <th>Description</th>
                 <th>Mac</th>
+                {{if $.CanCableDiagnostic}}<th>Cable</th>{{end}}
             </tr>
         </thead>
         <tbody>
@@ -42,8 +43,8 @@
                 <td class="mac-count col6 loading" id="mac_min-{{$key}}">
                     <img class="spinner" src="/snmp/assets/public/180-ring.svg" alt="loading" width="16">
                 </td>
-                <td class="macs col6" id="mac_max-{{$key}}">
-                </td>
+                <td class="macs col6" id="mac_max-{{$key}}"></td>
+                {{if $.CanCableDiagnostic}}<td class="col8 cable-diag"><img onclick="handlerGetCableDiagnostic({{$value.Index}})" src="/snmp/assets/public/cable.svg" alt="cable diagnostic" width="16"></td>{{end}}
             </tr>
         {{end}}
         </tbody>

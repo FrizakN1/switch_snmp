@@ -42,6 +42,7 @@ type SwitchOID struct {
 	BandwidthTX               string
 	PortStatus                string
 	PortName                  string
+	CableDistance             string
 }
 
 // ViewData matches fields used in template/index.html.
@@ -58,6 +59,7 @@ type ViewData struct {
 	Type                      string
 	CanChange                 bool
 	CanChangeBandwidth        bool
+	CanCableDiagnostic        bool
 	CPUUtilizationFiveSeconds string
 	CPUUtilizationOneMinutes  string
 	CPUUtilizationFiveMinutes string

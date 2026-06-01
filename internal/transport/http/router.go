@@ -22,7 +22,12 @@ func NewServer(cfg *config.Config, dlink *service.DlinkService, cisco *service.C
 func (s *Server) Router() *gin.Engine {
 	r := gin.Default()
 
-	r.LoadHTMLGlob("template/*.html")
+	r.LoadHTMLFiles(
+		"template/index.html",
+		"template/error.html",
+		"template/switches.html",
+		"template/tvbs.html",
+	)
 	routerSNMP := r.Group("/snmp")
 	routerSNMP.Static("assets/", "assets/")
 
@@ -40,6 +45,7 @@ func (s *Server) Router() *gin.Engine {
 	routerSNMP.POST("/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_port_description/:ip", s.handleChangePortDescription)
 	routerSNMP.POST("/dlink/change_bandwidth/:ip", s.handleChangeBandwidth)
+	routerSNMP.POST("/dlink/:ip/cable-diagnostic", s.handleGetDlinkCableDiagnostic)
 
 	return r
 }

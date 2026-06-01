@@ -242,6 +242,11 @@ type changeBandwidthRequest struct {
 	BandwidthRX int    `json:"BandwidthRX"`
 }
 
+type cableDiagnosticRequest struct {
+	Index       int    `json:"Index"`
+	SwitchModel string `json:"SwitchModel"`
+}
+
 func (s *Server) handleChangePortDescription(c *gin.Context) {
 	if token := os.Getenv("SNMP_API_TOKEN"); token != "" {
 		if c.GetHeader("Authorization") != "Bearer "+token {
@@ -325,4 +330,45 @@ func (s *Server) handleChangeBandwidth(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func (s *Server) handleGetDlinkCableDiagnostic(c *gin.Context) {
+	if token := os.Getenv("SNMP_API_TOKEN"); token != "" {
+		if c.GetHeader("Authorization") != "Bearer "+token {
+			log.Printf("unauthorized cable-diagnostic ip=%q", c.Param("ip"))
+			c.JSON(http.StatusUnauthorized, gin.H{"ok": false, "error": "unauthorized"})
+			return
+		}
+	}
+
+	ip := c.Param("ip")
+	if net.ParseIP(ip) == nil {
+		log.Printf("invalid ip in cable-diagnostic ip=%q", ip)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid ip"})
+		return
+	}
+
+	var req cableDiagnosticRequest
+	if err := c.BindJSON(&req); err != nil {
+		log.Printf("BindJSON cable-diagnostic ip=%q err=%v", ip, err)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid json"})
+		return
+	}
+	if req.Index <= 0 || req.SwitchModel == "" {
+		log.Printf("missing port fields cable-diagnostic ip=%q index=%d model=%q", ip, req.Index, req.SwitchModel)
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "missing port fields"})
+		return
+	}
+
+	result, err := s.dlink.GetCableDiagnostic(ip, service.CableDiagnosticRequest{
+		Index:       req.Index,
+		SwitchModel: req.SwitchModel,
+	})
+	if err != nil {
+		log.Printf("GetCableDiagnostic failed ip=%q idx=%d model=%q err=%v", ip, req.Index, req.SwitchModel, err)
+		c.JSON(http.StatusBadGateway, gin.H{"ok": false, "error": "snmp failed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true, "diagnostic": result})
 }

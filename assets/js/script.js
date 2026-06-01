@@ -231,6 +231,78 @@ function handlerSendBandwidthChange(key) {
         .catch(error => console.error(error))
 }
 
+function handlerGetCableDiagnostic(key) {
+    let switchModel = document.querySelector("h1").innerHTML.match(/\(([^)]+)\)/)[1]
+    let ip = window.location.href.split("snmp/dlink/")[1]
+    let cableBlock = renderCableDiagnosticLoading()
+
+    fetch(`/snmp/dlink/${ip}/cable-diagnostic`, {
+        method: "POST",
+        body: JSON.stringify({
+            Index: Number(key),
+            SwitchModel: switchModel
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data || !data.ok || !data.diagnostic) {
+                throw new Error("bad response")
+            }
+            renderCableDiagnosticResult(cableBlock, data.diagnostic)
+        })
+        .catch(error => {
+            console.error(error)
+            cableBlock.remove()
+            alert("не удалось выполнить диагностику кабеля")
+        })
+}
+
+function renderCableDiagnosticLoading() {
+    document.querySelector(".cable-block")?.remove()
+
+    let cableBlock = document.createElement("div")
+    cableBlock.className = "cable-block"
+    cableBlock.onclick = event => {
+        if (event.target === cableBlock) cableBlock.remove()
+    }
+    cableBlock.innerHTML = `
+        <div class="container loading">
+            <img src="/snmp/assets/public/180-ring.svg" alt="loading">
+        </div>
+    `
+    document.body.append(cableBlock)
+
+    return cableBlock
+}
+
+function renderCableDiagnosticResult(cableBlock, diagnostic) {
+    let pairResults = diagnostic.pairs.map((pair, index) => `Pair${index + 1}:${pair.result}<br>`).join("")
+    let pairDistances = diagnostic.pairs.map((pair, index) => `Pair${index + 1}:${pair.faultDistance}<br>`).join("")
+
+    cableBlock.innerHTML = `
+        <div class="container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Port</th>
+                        <th>Test Result</th>
+                        <th>Cable Fault Distance (meters)</th>
+                        <th>Cable Length (meters) [in range]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${diagnostic.port}</td>
+                        <td>${pairResults}</td>
+                        <td>${pairDistances}</td>
+                        <td>${diagnostic.lengthInRange}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `
+}
+
 function loadMacs() {
     let ip
     let url

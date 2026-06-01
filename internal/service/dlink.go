@@ -101,6 +101,7 @@ func (s *DlinkService) Get(ip string) (*domain.ViewData, error) {
 		Type:               "DGS",
 		CanChange:          sw.PortDesc != "" && sw.SaveConfig != "",
 		CanChangeBandwidth: canChangeBandwidth,
+		CanCableDiagnostic: sw.CableDistance != "",
 	}, nil
 }
 
@@ -145,6 +146,22 @@ type ChangeBandwidthRequest struct {
 	BandwidthRX int
 }
 
+type CableDiagnosticRequest struct {
+	Index       int
+	SwitchModel string
+}
+
+type CableDiagnosticPair struct {
+	Result        string `json:"result"`
+	FaultDistance string `json:"faultDistance"`
+}
+
+type CableDiagnosticResult struct {
+	Port          int                   `json:"port"`
+	Pairs         []CableDiagnosticPair `json:"pairs"`
+	LengthInRange string                `json:"lengthInRange"`
+}
+
 func (s *DlinkService) ChangeBandwidth(ip string, req ChangeBandwidthRequest) error {
 	sw, ok := switchdb.Switches[req.SwitchModel]
 	if !ok || sw.BandwidthTX == "" || sw.BandwidthRX == "" {
@@ -185,6 +202,95 @@ func (s *DlinkService) ChangeBandwidth(ip string, req ChangeBandwidthRequest) er
 	}
 
 	return nil
+}
+
+func (s *DlinkService) GetCableDiagnostic(ip string, req CableDiagnosticRequest) (*CableDiagnosticResult, error) {
+	sw, ok := switchdb.Switches[req.SwitchModel]
+	if !ok || sw.CableDistance == "" {
+		return nil, fmt.Errorf("cable diagnostic not supported for this model")
+	}
+
+	snmp := snmpx.NewClient(ip, s.cfg.ReadWriteCommunity)
+	if err := snmp.Connect(); err != nil {
+		return nil, err
+	}
+	defer snmp.Conn.Close()
+
+	triggerOID := fmt.Sprintf("%s.1.0", sw.CableDistance)
+	if _, err := snmp.Set([]g.SnmpPDU{{Name: triggerOID, Value: req.Index, Type: g.Integer}}); err != nil {
+		return nil, err
+	}
+
+	oids := make([]string, 0, 9)
+	for i := 2; i <= 10; i++ {
+		oids = append(oids, fmt.Sprintf("%s.%d.0", sw.CableDistance, i))
+	}
+
+	response, err := snmp.Get(oids)
+	if err != nil {
+		return nil, err
+	}
+	if len(response.Variables) != len(oids) {
+		return nil, fmt.Errorf("unexpected cable diagnostic response length: got %d, want %d", len(response.Variables), len(oids))
+	}
+
+	values := make([]int, len(response.Variables))
+	for i, variable := range response.Variables {
+		value, ok := snmpx.AsInt(variable.Value)
+		if !ok {
+			return nil, fmt.Errorf("unexpected cable diagnostic value type for %s: %T", variable.Name, variable.Value)
+		}
+		values[i] = value
+	}
+
+	pairs := make([]CableDiagnosticPair, 0, 4)
+	for i := 0; i < 8; i += 2 {
+		pairs = append(pairs, CableDiagnosticPair{
+			Result:        formatCableDiagnosticResult(values[i]),
+			FaultDistance: formatCableFaultDistance(values[i], values[i+1]),
+		})
+	}
+
+	return &CableDiagnosticResult{
+		Port:          req.Index,
+		Pairs:         pairs,
+		LengthInRange: formatCableLengthRange(values[8]),
+	}, nil
+}
+
+func formatCableDiagnosticResult(value int) string {
+	switch value {
+	case 0:
+		return "OK"
+	case 1:
+		return "Open in Cable"
+	case 2:
+		return "Short in Cable"
+	default:
+		return "N/A"
+	}
+}
+
+func formatCableFaultDistance(result, distance int) string {
+	if result != 1 && result != 2 {
+		return "N/A"
+	}
+	return strconv.Itoa(distance)
+}
+
+func formatCableLengthRange(value int) string {
+	switch value {
+	case 1:
+		return "< 50"
+	case 2:
+		return "50-80"
+	case 3:
+		return "80-100"
+	case 4:
+		return "100-140"
+	default:
+		return "N/A"
+	}
 }
 
 func getSwitchModel(snmp *g.GoSNMP) (string, error) {
